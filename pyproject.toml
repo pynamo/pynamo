@@ -1,0 +1,7 @@
+[project]
+name = "pynamo"
+version = "0.1.0"
+description = "A dynamodb ORM"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
