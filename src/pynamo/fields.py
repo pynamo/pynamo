@@ -56,10 +56,10 @@ class Field:
                            Returns None if the input value is None.
 
         Example:
-            >>> DynamoDBType.serialize(123)
+            >>> Field.serialize(123)
             '123'
 
-            >>> DynamoDBType.serialize(None)
+            >>> Field.serialize(None)
             None
 
         """
@@ -100,13 +100,13 @@ class Field:
                            Returns None if the input value is None.
 
         Example:
-            >>> DynamoDBType.deserialize('123')
+            >>> Field.deserialize('123')
             '123'
 
-            >>> DynamoDBType.deserialize(None)
+            >>> Field.deserialize(None)
             None
 
-            >>> DynamoDBType.deserialize('True')
+            >>> Field.deserialize('True')
             'True'
         """
         if value is None:
