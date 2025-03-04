@@ -5,3 +5,13 @@ description = "A dynamodb ORM"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = []
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3.5",
+]
+
+[build-system]
+requires = ["flit_core>=3.4"]
+build-backend = "flit_core.buildapi"
+
