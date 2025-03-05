@@ -1,5 +1,6 @@
-from pynamo import String
+from pynamo.fields import String
 from typing import Any
+
 
 import pytest
 

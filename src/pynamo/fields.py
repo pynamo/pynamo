@@ -1,6 +1,11 @@
 from typing import Any, Optional
 
 
+import datetime
+import uuid
+import decimal
+
+
 class Field:
     """
     Base class for defining a data field in DynamoDB.
@@ -38,7 +43,7 @@ class Field:
     dynamodb_descriptor: str = "S"  # default to string
 
     @staticmethod
-    def serialize(value: Any) -> Optional[str]:
+    def serialize(value: Any) -> Optional[Any]:
         """
         Converts a Python value into a format suitable for DynamoDB storage.
 
@@ -116,3 +121,116 @@ class Field:
 
 class String(Field):
     pass
+
+
+class Integer(Field):
+    dynamodb_descriptor = "N"
+
+    @staticmethod
+    def deserialize(value: Optional[Any]) -> Optional[int]:
+        if value is None:
+            return None
+        return int(value)
+
+
+class DateTime(Field):
+    dynamodb_descriptor = "S"
+
+    @staticmethod
+    def serialize(value: Any) -> Any:
+        if value is None:
+            return None
+        return value.isoformat()
+
+    @staticmethod
+    def deserialize(value: Any) -> Optional[datetime.datetime]:
+        if value is None:
+            return None
+        if isinstance(value, datetime.datetime):
+            return value
+        if isinstance(value, datetime.date):
+            return datetime.datetime.fromisoformat(value.isoformat())
+        return datetime.datetime.fromisoformat(value)
+
+
+class Date(Field):
+    dynamodb_descriptor = "S"
+
+    @staticmethod
+    def serialize(value: Any) -> Any:
+        if value is None:
+            return None
+        return value.isoformat()
+
+    @staticmethod
+    def deserialize(value: Optional[Any]) -> Optional[datetime.date]:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            return datetime.date.fromisoformat(
+                value,
+            )
+        if isinstance(value, datetime.date):
+            return value
+        raise TypeError(value)
+
+
+class UUID(Field):
+    dynamodb_descriptor = "S"
+
+    @staticmethod
+    def deserialize(value: Optional[Any]) -> Optional[uuid.UUID]:
+        if value is None:
+            return None
+        if isinstance(value, uuid.UUID):
+            return value
+        return uuid.UUID(value)
+
+
+class Float(Field):
+    dynamodb_descriptor = "N"
+
+    @staticmethod
+    def deserialize(value: Optional[Any]) -> Optional[float]:
+        if value is None:
+            return None
+        if isinstance(value, float):
+            return value
+        return float(str(value))
+
+
+class Decimal(Field):
+    dynamodb_descriptor = "N"
+
+    @staticmethod
+    def deserialize(value: Optional[Any]) -> Optional[decimal.Decimal]:
+        if value is None:
+            return None
+        if isinstance(value, decimal.Decimal):
+            return value
+        return decimal.Decimal(str(value))
+
+
+class Boolean(Field):
+    dynamodb_descriptor = "BOOL"
+
+    @staticmethod
+    def serialize(value: Optional[bool]) -> Optional[bool]:
+        if value is None:
+            return None
+        return value
+
+    @staticmethod
+    def deserialize(value: Optional[Any]) -> Optional[bool]:
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, int):
+            return bool(value)
+        if isinstance(value, str):
+            if value.lower() in ("y", "yes", "t", "true", "on", "1"):
+                return True
+            if value.lower() in ("n", "no", "f", "false", "off", "0"):
+                return False
+        raise TypeError(value)
