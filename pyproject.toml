@@ -3,14 +3,14 @@ name = "pynamo"
 version = "0.1.0"
 description = "A dynamodb ORM"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.7"
 dependencies = []
 
 [tool.uv]
 dev-dependencies = [
-    "ipython>=8.18.1",
+    "mypy>=1.4.1",
     "pytest-coverage>=0.0",
-    "pytest>=8.3.5",
+    "pytest>=7.4.4",
 ]
 
 [build-system]
