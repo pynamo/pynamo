@@ -28,3 +28,6 @@ jobs:
 
       - name: Run tests
         run: uv run pytest tests --cov=src/pynamo --cov-report=term-missing
+
+      - name: mypy
+        run: uv run mypy src
