@@ -365,7 +365,9 @@ class Model(metaclass=DeclarativeBase):
 
         mapped_columns = self.forward_mapped_columns(attr.attribute.key)
 
-        dynamodb_data = {}
+        dynamodb_data: Dict[str, Any] = {}
+
+        col_name: str
 
         for col_name in filter(None, mapped_columns):
             if value is None:
