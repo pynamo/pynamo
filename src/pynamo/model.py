@@ -34,7 +34,7 @@ class BaseMeta(type):
             # if not dct["__abstract__"]:
             #    raise TypeError("__abstract__ must be True if no __table__")
 
-            dct["__table_mapper__"] = {}
+            dct["__forward_table_mapper__"] = {}
             dct["__reverse_table_mapper__"] = {}
             return super().__new__(cls, name, bases, dct)
 
@@ -203,6 +203,7 @@ class BaseMeta(type):
 
 
 class Model(metaclass=BaseMeta):
+    __abstract__: Optional[bool] = False
     __table__: Optional[Table] = None
 
     def __init__(self, **kwargs: Any):
