@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING, Dict, Any, Tuple, List, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 if TYPE_CHECKING:
+    from ..attribute import Attribute, BindParameter, Expression
     from ..model import Model
-    from ..attribute import Attribute, Expression, BindParameter
 
 
 class Query:
@@ -31,8 +31,9 @@ class Query:
         return self
 
     def to_dynamodb(self, start_key: Any = None) -> Dict[str, Any]:
-        if self._model.__abstract__:
+        if not self._model.__table__:
             raise TypeError("abstract")
+
         table_name = self._model.__table__.name
 
         where_clauses = []

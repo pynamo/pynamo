@@ -11,15 +11,16 @@ from typing import (
     Union,
 )
 
-from .op import GetItem, PutItem, TransactWriteItems
-
-# from .query import Query
-# from .delete_item import DeleteItem
-# from .put_item import PutItem
-# from .update_item import UpdateItem
-# from .transact_write_items import TransactWriteItems
 if TYPE_CHECKING:
     from .model import Model
+    from .op import (
+        DeleteItem,
+        GetItem,
+        PutItem,
+        Query,
+        TransactWriteItems,
+        UpdateItem,
+    )
 
 
 class _ThreadLocalRegistry:
@@ -77,7 +78,6 @@ class SessionBase:
         self.objects_to_add: Set["Model"] = set()
         # self.objects_to_update: Dict[] = {}
         self.objects_to_delete: Dict[Any, "Model"] = {}
-
         self.raise_on_item_limits = raise_on_item_limits
 
     def add(self, obj: "Model"):
@@ -127,21 +127,23 @@ class Session(SessionBase):
         super().__init__(**kwargs)
         self.client = client
 
+    def execute(self, op: Union["GetItem", "PutItem"]):
+        func_map = {
+            "GetItem": "get_item",
+            "PutItem": "put_item",
+        }
+        func_name = func_map[op.__class__.__name__]
+
+        func = getattr(self.client, func_name)
+
+        res = func(**op.to_dynamodb())
+        return res
+
     def save(self):
         transaction = self.as_transaction()
 
         client = self.client
         return client.transact_write_items(transaction.to_dynamodb())
-
-    def query(self, model):
-        q = Query(model)
-        return q
-
-    def get_item(self, model):
-        pass
-
-    def put_item(self):
-        pass
 
 
 class AsyncSession(SessionBase):
