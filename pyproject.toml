@@ -8,10 +8,12 @@ dependencies = []
 
 [tool.uv]
 dev-dependencies = [
+    "furo>=2024.8.6",
     "mypy>=1.15.0",
     "pytest-coverage>=0.0",
     "pytest>=8.3.5",
     "ruff>=0.9.9",
+    "sphinx>=7.4.7",
 ]
 
 [tool.ruff]
