@@ -1,16 +1,16 @@
 from typing import TYPE_CHECKING, Dict, Any, Type
 
 if TYPE_CHECKING:
-    from .model import Model
-    from .attribute import Expression
+    from ..model import Model
+    from ..attribute import Expression
 
 
-class GetItem:
+class DeleteItem:
     def __init__(self, obj: "Model"):
         self.obj = obj
 
     @classmethod
-    def where(cls, *args: "Expression") -> "GetItem":
+    def where(cls, *args: "Expression") -> "DeleteItem":
         instance = None
 
         for exp in args:

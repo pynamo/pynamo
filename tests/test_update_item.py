@@ -1,5 +1,6 @@
-from pynamo import Attribute, Model, UpdateItem, Table, PrimaryIndex
+from pynamo import Attribute, Model, Table, PrimaryIndex
 from pynamo.fields import String
+from pynamo.op import UpdateItem
 
 
 def test_update_item():

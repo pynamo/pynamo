@@ -1,4 +1,5 @@
-from pynamo import Attribute, Model, PutItem, Table, PrimaryIndex
+from pynamo import Attribute, Model, Table, PrimaryIndex
+from pynamo.op import PutItem
 
 from pynamo.fields import String
 
