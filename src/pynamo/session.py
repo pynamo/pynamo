@@ -127,7 +127,7 @@ class Session(SessionBase):
         super().__init__(**kwargs)
         self.client = client
 
-    def execute(self, op: Union["GetItem", "PutItem"]):
+    def execute(self, op: Union["GetItem", "PutItem", "Query"]):
         func_map = {
             "GetItem": "get_item",
             "PutItem": "put_item",
