@@ -8,9 +8,9 @@ A lightweight, client-agnostic Python ORM for Amazon DynamoDB.
 
 ```python
 
-from pynamo import Table, PrimaryIndex, Attribute, Model, GetItem
+from pynamo import Table, PrimaryIndex, Attribute, Model
 from pynamo.fields import String
-
+from pynamo.op import GetItem
 
 my_table = Table(
     "table",
