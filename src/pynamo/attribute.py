@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Type, Optional, Callable, Union, Any
+from typing import TYPE_CHECKING, Any, Callable, Optional, Type, Union
 
 if TYPE_CHECKING:
     from .fields import Field
@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 
 from .constants import DEFERRED_ATTRIBUTE_KEY, PRIMARY_INDEX
-from .expression import Expression, BindParameter
+from .expression import BindParameter, Expression
 
 
 class Attribute:

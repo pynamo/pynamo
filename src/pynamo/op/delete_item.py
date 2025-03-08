@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING, Dict, Any, Type
+from typing import TYPE_CHECKING, Any, Dict, Type
 
 if TYPE_CHECKING:
-    from ..model import Model
     from ..attribute import Expression
+    from ..model import Model
 
 
 class DeleteItem:

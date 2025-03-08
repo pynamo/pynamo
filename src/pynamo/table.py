@@ -1,10 +1,10 @@
-from typing import TYPE_CHECKING, Dict, Set, Union, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Set, Union
 
 if TYPE_CHECKING:
     from .attribute import Attribute
 
 
-from .constants import PRIMARY_INDEX, DEFERRED_ATTRIBUTE_KEY
+from .constants import DEFERRED_ATTRIBUTE_KEY, PRIMARY_INDEX
 
 
 class PrimaryIndex:

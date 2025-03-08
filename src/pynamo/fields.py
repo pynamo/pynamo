@@ -1,9 +1,7 @@
-from typing import Any, Optional
-
-
 import datetime
-import uuid
 import decimal
+import uuid
+from typing import Any, Optional
 
 
 class Field:

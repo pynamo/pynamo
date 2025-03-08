@@ -1,4 +1,4 @@
-from typing import Any, Dict, TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 if TYPE_CHECKING:
     from .get_item import GetItem

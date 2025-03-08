@@ -1,21 +1,17 @@
 from typing import (
-    Dict,
     Any,
-    Set,
-    Optional,
+    Dict,
     List,
+    Optional,
+    Set,
     Tuple,
     Type,
     cast,
 )
 
-
 from .attribute import Attribute, InstrumentedAttribute
-from .table import Table
-
-
 from .constants import DEFERRED_ATTRIBUTE_KEY, PRIMARY_INDEX
-
+from .table import Table
 
 models: Dict[str, Any] = {}
 

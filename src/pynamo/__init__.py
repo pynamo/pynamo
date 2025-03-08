@@ -1,12 +1,11 @@
-from .table import (
-    Table,
-    PrimaryIndex,
-    GlobalSecondaryIndex,
-    LocalSecondaryIndex,
-)
 from .attribute import Attribute
 from .model import Model
-
+from .table import (
+    GlobalSecondaryIndex,
+    LocalSecondaryIndex,
+    PrimaryIndex,
+    Table,
+)
 
 __all__ = [
     "Table",

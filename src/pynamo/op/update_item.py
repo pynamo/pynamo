@@ -1,9 +1,8 @@
-from typing import TYPE_CHECKING, Dict, Any, Type, Literal
-
+from typing import TYPE_CHECKING, Any, Dict, Literal, Type
 
 if TYPE_CHECKING:
-    from ..model import Model
     from ..attribute import Expression
+    from ..model import Model
 
 from .base import Operation
 
