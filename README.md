@@ -30,7 +30,7 @@ request = GetItem.where(Foo.id == "123", Foo.name == "My Name")
 request.to_dynamodb()
 # {
 #   "TableName": "table",
-#    "Key": {"PK": {"S": "123"}},
+#   "Key": {"PK": {"S": "123"}},
 # }
 
 ```
