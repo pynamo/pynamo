@@ -207,6 +207,8 @@ class BaseMeta(type):
 
 
 class Model(metaclass=BaseMeta):
+    __table__: Optional[Table] = None
+
     def __init__(self, **kwargs: Any):
         self._original_state: Dict[str, Any] = {}
         self.modified_attrs: Set[str] = set()
