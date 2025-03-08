@@ -20,7 +20,7 @@ from .constants import DEFERRED_ATTRIBUTE_KEY, PRIMARY_INDEX
 models: Dict[str, Any] = {}
 
 
-class DeclarativeBase(type):
+class BaseMeta(type):
     __table__: Optional[Table] = None
     __abstract__: bool = False
     __forward_table_mapper__: Dict[str, List[Any]] = {}
@@ -61,7 +61,7 @@ class DeclarativeBase(type):
 
         inherited_attrs = {}
         for base in bases:
-            if isinstance(base, DeclarativeBase):
+            if isinstance(base, BaseMeta):
                 for key, value in base.__dict__.items():
                     if isinstance(value, Attribute):
                         inherited_attrs[key] = value
@@ -197,16 +197,16 @@ class DeclarativeBase(type):
         dct["__table__"] = table
         dct["__forward_table_mapper__"] = forward_table_mapper
         dct["__reverse_table_mapper__"] = reverse_table_mapper
-        cls_instance = super().__new__(cls, name, bases, dct)
+        model_class = super().__new__(cls, name, bases, dct)
 
-        for key, value in cls_instance.__dict__.items():
+        for key, value in model_class.__dict__.items():
             if isinstance(value, InstrumentedAttribute):
-                value.attribute.model_cls = cast(Type["Model"], cls)
+                value.attribute.model_cls = cast(Type["Model"], model_class)
 
-        return cls_instance
+        return model_class
 
 
-class Model(metaclass=DeclarativeBase):
+class Model(metaclass=BaseMeta):
     def __init__(self, **kwargs: Any):
         self._original_state: Dict[str, Any] = {}
         self.modified_attrs: Set[str] = set()
