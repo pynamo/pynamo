@@ -15,7 +15,7 @@ from pynamo.fields import String
 my_table = Table(
     "table",
     PrimaryIndex(
-        "PK", String
+        Attribute("PK", String),
     )
 )
 
