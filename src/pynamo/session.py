@@ -153,11 +153,11 @@ class AsyncSession(SessionBase):
 
 
 class SessionMaker:
-    def __init__(self, client: Any = None):
-        self.client = client
+    def __init__(self, client_factory: Callable[[], Any]):
+        self.client_factory = client_factory
 
     def __call__(self) -> Session:
-        return Session(client=self.client)
+        return Session(client=self.client_factory())
 
 
 class AsyncSessionMaker:
