@@ -12,6 +12,7 @@ from typing import (
 from .attribute import Attribute, InstrumentedAttribute
 from .constants import DEFERRED_ATTRIBUTE_KEY, PRIMARY_INDEX
 from .table import Table
+from pynamo import attribute
 
 models: Dict[str, Any] = {}
 
@@ -425,10 +426,40 @@ class Model(metaclass=BaseMeta):
         """
         if self.__class__.__table__ is None:
             raise TypeError("__table__ required")
-        dynamodb_item = self.to_dynamodb_item()["Item"]
 
         pk_cols = self.__class__.__table__.indexes[PRIMARY_INDEX]
 
-        return {
-            col: dynamodb_item[col] for col in pk_cols if col in dynamodb_item
+        pk_attr_name: str = self.__class__.__reverse_table_mapper__[pk_cols[0]]
+        pk_val: Any = getattr(self, pk_attr_name)
+
+        if not pk_val:
+            raise ValueError(f"Partition key {pk_attr_name} cannot be empty")
+
+        pk_inst_attr = self.__class__.__dict__[pk_attr_name]
+
+        dynamodb_data: Dict[str, Any] = {}
+
+        if pk_inst_attr.attribute.prefix:
+            pk_val = f"{pk_val}{pk_inst_attr.attribute.prefix}"
+
+        if not pk_cols[0]:
+            raise Exception("not sure how this is possible")
+
+        dynamodb_data[pk_cols[0]] = {
+            pk_inst_attr.attribute.attribute_type.dynamodb_descriptor: pk_val,
         }
+
+        if pk_cols[1]:
+            sk_attr_name: str = self.__class__.__reverse_table_mapper__[
+                pk_cols[1]
+            ]
+            sk_val: Any = getattr(self, sk_attr_name)
+            if not sk_val:
+                raise ValueError(f"Sort key {sk_attr_name} cannot be empty")
+
+            sk_inst_attr = self.__class__.__dict__[sk_attr_name]
+
+            dynamodb_data[pk_cols[1]] = {
+                sk_inst_attr.attribute.attribute_type.dynamodb_descriptor: sk_val,
+            }
+        return dynamodb_data
