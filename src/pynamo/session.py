@@ -9,6 +9,7 @@ from typing import (
     Tuple,
     Type,
     Union,
+    cast,
 )
 
 if TYPE_CHECKING:
@@ -127,17 +128,25 @@ class Session(SessionBase):
         super().__init__(**kwargs)
         self.client = client
 
+    def get_item(self, op: "GetItem"):
+        if op.instance.ref in self.object_registry:
+            return op.instance
+
+        client_func = getattr(self.client, "get_item")
+
+        res = client_func(**op.to_dynamodb())
+
+        model_cls = op.model_cls
+
+        instance = model_cls.from_dynamodb_item(res["Item"])
+
+        self.object_registry[op.instance.ref] = instance
+        return instance
+
     def execute(self, op: Union["GetItem", "PutItem", "Query"]):
-        func_map = {
-            "GetItem": "get_item",
-            "PutItem": "put_item",
-        }
-        func_name = func_map[op.__class__.__name__]
-
-        func = getattr(self.client, func_name)
-
-        res = func(**op.to_dynamodb())
-        return res
+        if op.__class__.__name__ == "GetItem":
+            return self.get_item(cast("GetItem", op))
+        raise NotImplementedError()
 
     def save(self):
         transaction = self.as_transaction()
