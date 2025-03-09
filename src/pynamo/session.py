@@ -6,8 +6,6 @@ from typing import (
     Dict,
     Optional,
     Set,
-    Tuple,
-    Type,
     Union,
     cast,
 )
@@ -56,7 +54,7 @@ class _ScopedRegistry:
         self.factory_func = factory_func
         self.scope_func = scope_func
 
-    def __call__(self) -> Any:
+    def __call__(self) -> "Session":
         key = self.scope_func()
         try:
             return self.registry[key]
@@ -128,7 +126,7 @@ class Session(SessionBase):
         super().__init__(**kwargs)
         self.client = client
 
-    def get_item(self, op: "GetItem"):
+    def get_item(self, op: "GetItem") -> "Model":
         if op.instance.ref in self.object_registry:
             return op.instance
 
@@ -160,6 +158,26 @@ class AsyncSession(SessionBase):
         super().__init__(**kwargs)
         self.client = client
 
+    async def get_item(self, op: "GetItem"):
+        if op.instance.ref in self.object_registry:
+            return op.instance
+
+        client_func = getattr(self.client, "get_item")
+
+        res = await client_func(**op.to_dynamodb())
+
+        model_cls = op.model_cls
+
+        instance = model_cls.from_dynamodb_item(res["Item"])
+
+        self.object_registry[op.instance.ref] = instance
+        return instance
+
+    async def execute(self, op: Union["GetItem", "PutItem", "Query"]):
+        if op.__class__.__name__ == "GetItem":
+            return await self.get_item(cast("GetItem", op))
+        raise NotImplementedError()
+
 
 class SessionMaker:
     def __init__(self, client_factory: Callable[[], Any]):
@@ -180,7 +198,7 @@ class AsyncSessionMaker:
 class ScopedSession:
     def __init__(
         self,
-        session_factory: Callable[[], SessionMaker],
+        session_factory: SessionMaker,
         scopefunc: Optional[Callable[[], Any]] = None,
     ) -> None:
         self.session_factory = session_factory
@@ -190,11 +208,10 @@ class ScopedSession:
         else:
             self.registry = _ThreadLocalRegistry(session_factory)
 
-    def __call__(self) -> Union[_ScopedRegistry, _ThreadLocalRegistry]:
+    def __call__(self) -> Session:
         return self.registry()
 
     def remove(self):
-        if self.registry.active():
-            pass
-            # self.registry().close()
+        # if self.registry.active():
+        #    self.registry().close()
         self.registry.clear()

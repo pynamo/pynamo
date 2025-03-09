@@ -5,8 +5,19 @@ from pynamo.fields import String
 from pynamo.op import GetItem
 
 
+class TestClient:
+    @classmethod
+    def get_item(cls, **kwargs):
+        return {
+            "Item": {
+                "PK": {"S": "123"},
+                "email": {"S": "user@example.org"},
+            },
+        }
+
+
 def test_scoped_session():
-    scoped = ScopedSession(SessionMaker())
+    scoped = ScopedSession(SessionMaker(lambda: TestClient()))
 
     session1 = scoped()
 
@@ -23,8 +34,11 @@ def test_scoped_session_with_scopefunc():
         i = i + 1
         return i
 
+    def client_factory():
+        return None
+
     scoped = ScopedSession(
-        SessionMaker(),
+        SessionMaker(lambda: TestClient()),
         scopefunc=my_scope_func,
     )
 
@@ -36,12 +50,7 @@ def test_scoped_session_with_scopefunc():
 
 
 def test_session_get_item():
-    class MyClient:
-        @classmethod
-        def get_item(cls, **kwargs):
-            return {"Item": "Some Item"}
-
-    session = Session(client=MyClient)
+    session = Session(client=TestClient())
 
     mytable = Table(
         "mytable",
@@ -55,4 +64,4 @@ def test_session_get_item():
     op = GetItem(User).where(User.id == "123")
 
     res = session.execute(op)
-    assert res == {"Item": "Some Item"}
+    assert isinstance(res, User)
