@@ -210,9 +210,6 @@ class Model(metaclass=BaseMeta):
         self._original_state: Dict[str, Any] = {}
         self.modified_attrs: Set[str] = set()
 
-        self._pk_partition_key: Optional[Any] = None
-        self._pk_sort_key: Optional[Any] = None
-
         for key, val in kwargs.items():
             self.__setattr__(key, val)
 
@@ -257,9 +254,6 @@ class Model(metaclass=BaseMeta):
 
         instance = cls()
 
-        instance.pk = None
-        instance.sk = None
-
         for key, value in item_dict.items():
             mapped_key = cls.__reverse_table_mapper__.get(key, key)
 
@@ -277,7 +271,7 @@ class Model(metaclass=BaseMeta):
                 if value and value.startswith(inst_attribute.attribute.prefix):
                     value = value[len(inst_attribute.attribute.prefix) :]
 
-            instance.__setattr__(key, value)
+            instance.__setattr__(mapped_key, value)
         return instance
 
     def to_dynamodb_item(self) -> Dict[str, Any]:
