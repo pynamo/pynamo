@@ -422,7 +422,6 @@ class Model(metaclass=BaseMeta):
     def primary_key(self) -> Dict[Any, Any]:
         """
         Returns the primary key representation formatted for DynamoDB.
-        Extracts key attributes from `to_dynamodb_item()`.
         """
         if self.__class__.__table__ is None:
             raise TypeError("__table__ required")
