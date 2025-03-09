@@ -438,7 +438,7 @@ class Model(metaclass=BaseMeta):
         dynamodb_data: Dict[str, Any] = {}
 
         if pk_inst_attr.attribute.prefix:
-            pk_val = f"{pk_val}{pk_inst_attr.attribute.prefix}"
+            pk_val = f"{pk_inst_attr.attribute.prefix}{pk_val}"
 
         if not pk_cols[0]:
             raise Exception("not sure how this is possible")
@@ -456,6 +456,9 @@ class Model(metaclass=BaseMeta):
                 raise ValueError(f"Sort key {sk_attr_name} cannot be empty")
 
             sk_inst_attr = self.__class__.__dict__[sk_attr_name]
+
+            if sk_inst_attr.attribute.prefix:
+                sk_val = f"{sk_inst_attr.attribute.prefix}{sk_val}"
 
             dynamodb_data[pk_cols[1]] = {
                 sk_inst_attr.attribute.attribute_type.dynamodb_descriptor: sk_val,
