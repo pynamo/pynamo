@@ -12,7 +12,6 @@ from typing import (
 from .attribute import Attribute, InstrumentedAttribute
 from .constants import DEFERRED_ATTRIBUTE_KEY, PRIMARY_INDEX
 from .table import Table
-from pynamo import attribute
 
 models: Dict[str, Any] = {}
 
