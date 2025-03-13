@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Self, Type
+from typing import TYPE_CHECKING, Any, Dict, Type
 
 if TYPE_CHECKING:
     from ..attribute import Expression
@@ -9,7 +9,7 @@ class GetItem:
     def __init__(self, model_cls: Type["Model"]):
         self.model_cls = model_cls
 
-    def where(self, *args: "Expression") -> Self:
+    def where(self, *args: "Expression") -> "GetItem":
         instance = self.model_cls()
 
         for exp in args:

@@ -1,4 +1,3 @@
-from re import UNICODE
 import threading
 from typing import (
     TYPE_CHECKING,
@@ -10,6 +9,8 @@ from typing import (
     Union,
     cast,
 )
+
+from . import limits
 
 if TYPE_CHECKING:
     from .model import Model

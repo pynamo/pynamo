@@ -1,12 +1,12 @@
 from .attribute import Attribute
 from .model import Model
+from .op import GetItem, PutItem
 from .table import (
     GlobalSecondaryIndex,
     LocalSecondaryIndex,
     PrimaryIndex,
     Table,
 )
-from .op import GetItem, PutItem
 
 __all__ = [
     "Table",
