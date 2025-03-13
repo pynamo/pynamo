@@ -12,7 +12,7 @@ class Query:
         self._index_name = None
 
     def mapped_columns(self, col_name: str):
-        return self._model.__forward_table_mapper__.get(
+        return self._model.__forward_table_mapper__.get(  # type: ignore
             col_name,
             (
                 col_name,

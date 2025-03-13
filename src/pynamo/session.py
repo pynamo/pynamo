@@ -1,3 +1,4 @@
+from re import UNICODE
 import threading
 from typing import (
     TYPE_CHECKING,
@@ -126,7 +127,7 @@ class Session(SessionBase):
         super().__init__(**kwargs)
         self.client = client
 
-    def get_item(self, op: "GetItem") -> "Model":
+    def _get_item(self, op: "GetItem") -> "Model":
         if op.instance.ref in self.object_registry:
             return op.instance
 
@@ -141,9 +142,21 @@ class Session(SessionBase):
         self.object_registry[op.instance.ref] = instance
         return instance
 
-    def execute(self, op: Union["GetItem", "PutItem", "Query"]):
+    def _put_item(self, op: "PutItem") -> "Model":
+        client_func = getattr(self.client, "put_item")
+
+        client_func(**op.to_dynamodb())
+
+        self.object_registry[op.instance.ref] = op.instance
+        return op.instance
+
+    def execute(self, op: Union["GetItem", "PutItem", "Query"]) -> "Model":
         if op.__class__.__name__ == "GetItem":
-            return self.get_item(cast("GetItem", op))
+            return self._get_item(cast("GetItem", op))
+
+        if op.__class__.__name__ == "PutItem":
+            return self._put_item(cast("PutItem", op))
+
         raise NotImplementedError()
 
     def save(self):
@@ -202,6 +215,8 @@ class ScopedSession:
         scopefunc: Optional[Callable[[], Any]] = None,
     ) -> None:
         self.session_factory = session_factory
+
+        self.registry: Union[_ThreadLocalRegistry, _ScopedRegistry]
 
         if scopefunc:
             self.registry = _ScopedRegistry(session_factory, scopefunc)

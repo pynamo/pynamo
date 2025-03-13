@@ -298,9 +298,8 @@ class Model(metaclass=BaseMeta):
         """
         if self.__class__.__table__ is None:
             raise TypeError("__table__ required")
-        table_name = self.__class__.__table__.name
 
-        item_data = {}
+        item_data: Dict[str, Any] = {}
 
         for key, attr in self.__class__.__dict__.items():
             if isinstance(attr, InstrumentedAttribute):
@@ -332,10 +331,7 @@ class Model(metaclass=BaseMeta):
                             attr.attribute.attribute_type.dynamodb_descriptor: value
                         }
 
-        return {
-            "TableName": table_name,
-            "Item": item_data,
-        }
+        return item_data
 
     def attr_to_dynamodb(self, attr_name: str):
         attr = self.__class__.__dict__[attr_name]

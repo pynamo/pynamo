@@ -1,6 +1,5 @@
-from pynamo import Attribute, Model, Table, PrimaryIndex
+from pynamo import Attribute, Model, Table, PrimaryIndex, GetItem
 from pynamo.fields import String
-from pynamo.op import GetItem
 
 
 def test_get_item_from_model_instance():

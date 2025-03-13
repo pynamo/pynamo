@@ -27,4 +27,5 @@ def test_put_item():
             "PK": {"S": "123"},
             "email": {"S": "user@example.org"},
         },
+        "ReturnValues": "NONE",
     }

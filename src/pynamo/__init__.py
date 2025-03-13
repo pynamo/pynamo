@@ -6,10 +6,13 @@ from .table import (
     PrimaryIndex,
     Table,
 )
+from .op import GetItem, PutItem
 
 __all__ = [
     "Table",
     "PrimaryIndex",
+    "GetItem",
+    "PutItem",
     "GlobalSecondaryIndex",
     "LocalSecondaryIndex",
     "Attribute",

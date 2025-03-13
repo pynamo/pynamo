@@ -82,11 +82,8 @@ def test_model_to_dynamodb_item():
 
     foo = Foo(id="123", name="silly name")
     assert foo.to_dynamodb_item() == {
-        "TableName": "mytable",
-        "Item": {
-            "PK": {"S": "123"},
-            "name": {"S": "silly name"},
-        },
+        "PK": {"S": "123"},
+        "name": {"S": "silly name"},
     }
 
 
