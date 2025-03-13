@@ -4,13 +4,12 @@ A lightweight, client-agnostic Python ORM for Amazon DynamoDB.
 
 ![Tests](https://github.com/pynamo/pynamo/actions/workflows/tests.yaml/badge.svg)
 
-## Quick Example
+## Creating a Model
 
 ```python
 
-from pynamo import Table, PrimaryIndex, Attribute, Model
+from pynamo import Table, PrimaryIndex, Attribute, Model, GetItem
 from pynamo.fields import String
-from pynamo.op import GetItem
 
 my_table = Table(
     "table",
@@ -25,12 +24,60 @@ class User(Model):
     id = Attribute(String, primary_key=True)
     email = Attribute(String)
 
-request = GetItem.where(Foo.id == "123", Foo.name == "My Name")
+```
 
+## GetItem
+
+#### Client Agnostic
+
+```python
+request = GetItem.where(User.id == "123")
 request.to_dynamodb()
 # {
 #   "TableName": "table",
 #   "Key": {"PK": {"S": "123"}},
 # }
+
+```
+
+#### With boto3
+
+```python
+import boto3
+
+boto3_client = boto3.client("dynamodb")
+
+request = GetItem.where(User.id == "123")
+
+res = boto3_client.get_item(**request)
+
+```
+
+#### With aioboto3
+
+```python
+session = aioboto3.Session()
+async with session.client("dynamodb") as client:
+    request = (
+        GetItem(Dog)
+        .where(
+            Dog.id == "123",
+        )
+        .to_dynamodb()
+    )
+
+    res = await client.get_item(**request)
+```
+
+### With a pynamo session
+
+```python
+from pynamo.session import Session
+
+session = Session(boto3_client)
+
+session.execute(
+    GetItem.where(User.id == "123")
+)
 
 ```
