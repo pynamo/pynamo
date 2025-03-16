@@ -9,7 +9,7 @@ class GetItem:
     def __init__(self, model_cls: Type["Model"]):
         self.model_cls = model_cls
 
-    def where(self, *args: "Expression") -> "GetItem":
+    def where(self, *args: "Expression", **kwargs: Any) -> "GetItem":
         instance = self.model_cls()
 
         for exp in args:
@@ -20,6 +20,9 @@ class GetItem:
             attr = exp.left
             value: Any = exp.right.value
             setattr(instance, attr.key, value)
+
+        for k, v in kwargs.items():
+            setattr(instance, k, v)
 
         self.instance = instance
         return self

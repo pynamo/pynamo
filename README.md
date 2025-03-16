@@ -31,7 +31,7 @@ class User(Model):
 #### Client Agnostic
 
 ```python
-request = GetItem.where(User.id == "123")
+request = GetItem(User).where(id="123")
 request.to_dynamodb()
 # {
 #   "TableName": "table",
@@ -47,7 +47,7 @@ import boto3
 
 boto3_client = boto3.client("dynamodb")
 
-request = GetItem.where(User.id == "123")
+request = GetItem(User).where(id="123")
 
 res = boto3_client.get_item(**request)
 
@@ -60,8 +60,7 @@ session = aioboto3.Session()
 async with session.client("dynamodb") as client:
     request = (
         GetItem(Dog)
-        .where(
-            Dog.id == "123",
+        .where(id="123",
         )
         .to_dynamodb()
     )
@@ -77,7 +76,7 @@ from pynamo.session import Session
 session = Session(boto3_client)
 
 session.execute(
-    GetItem.where(User.id == "123")
+    GetItem(User).where(id="123")
 )
 
 ```
