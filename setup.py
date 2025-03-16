@@ -2,8 +2,11 @@ from setuptools import setup, Extension
 
 # Define the C extension
 module = Extension(
-    "pynamo._conversion",
-    sources=["src/pynamo/_conversion.c"],
+    "pynamo._pynamo",
+    sources=[
+        "src/pynamo/_pynamo/deserialize_integer.c",
+        "src/pynamo/_pynamo/pynamo.c",
+    ],
     extra_compile_args=["-O3"],  # Enable optimization
 )
 
