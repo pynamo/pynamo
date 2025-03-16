@@ -1,8 +1,8 @@
 import datetime
 import decimal
 import uuid
-from typing import Any, Optional
-from pynamo._pynamo import deserialize_integer
+from typing import Any, Optional, cast
+from pynamo import _pynamo
 
 
 class Field:
@@ -127,7 +127,7 @@ class Integer(Field):
 
     @staticmethod
     def deserialize(value: Optional[Any]) -> Optional[int]:
-        return deserialize_integer(value)
+        return _pynamo.deserialize_integer(value)
 
 
 class DateTime(Field):
@@ -201,11 +201,7 @@ class Decimal(Field):
 
     @staticmethod
     def deserialize(value: Optional[Any]) -> Optional[decimal.Decimal]:
-        if value is None:
-            return None
-        if isinstance(value, decimal.Decimal):
-            return value
-        return decimal.Decimal(str(value))
+        return _pynamo.deserialize_decimal(value)
 
 
 class Boolean(Field):

@@ -5,5 +5,6 @@
 #include <Python.h>
 
 PyObject *deserialize_integer(PyObject *self, PyObject *args);
+PyObject *deserialize_decimal(PyObject *self, PyObject *args);
 
 #endif
