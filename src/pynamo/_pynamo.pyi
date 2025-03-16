@@ -1,7 +1,8 @@
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from decimal import Decimal
 
 def deserialize_integer(value: Any) -> Optional[int]: ...
 def deserialize_decimal(value: Any) -> Optional["Decimal"]: ...
+def extract_dynamodb_value(value: Dict[str, Any]) -> Optional[str]: ...

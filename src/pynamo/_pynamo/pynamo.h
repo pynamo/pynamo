@@ -6,5 +6,6 @@
 
 PyObject *deserialize_integer(PyObject *self, PyObject *args);
 PyObject *deserialize_decimal(PyObject *self, PyObject *args);
+PyObject *extract_dynamodb_value(PyObject *self, PyObject *args);
 
 #endif

@@ -5,7 +5,6 @@ PyObject *deserialize_integer(PyObject *self, PyObject *args)
 {
     PyObject *value;
 
-    // Parse the input argument
     if (!PyArg_ParseTuple(args, "O", &value))
     {
         return NULL;
@@ -17,20 +16,20 @@ PyObject *deserialize_integer(PyObject *self, PyObject *args)
         Py_RETURN_NONE;
     }
 
-    // Handle already integer value (pass-through)
+    // Handle integer
     if (PyLong_Check(value))
     {
         Py_INCREF(value);
         return value;
     }
 
-    // Handle boolean (pass-through)
+    // Handle boolean
     if (PyBool_Check(value))
     {
         return PyLong_FromLong(value == Py_True ? 1 : 0);
     }
 
-    // Handle float → Convert to int
+    // Handle float
     if (PyFloat_Check(value))
     {
         double float_val = PyFloat_AsDouble(value);
@@ -57,7 +56,7 @@ PyObject *deserialize_integer(PyObject *self, PyObject *args)
         return PyLong_FromLong(result);
     }
 
-    // Unsupported type → Raise exception
+    // Unsupported type
     PyErr_SetString(PyExc_TypeError, "Unsupported type for integer conversion");
     return NULL;
 }
