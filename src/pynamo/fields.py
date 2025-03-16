@@ -2,6 +2,7 @@ import datetime
 import decimal
 import uuid
 from typing import Any, Optional
+from ._conversion import convert_number
 
 
 class Field:
@@ -128,7 +129,7 @@ class Integer(Field):
     def deserialize(value: Optional[Any]) -> Optional[int]:
         if value is None:
             return None
-        return int(value)
+        return convert_number(value)
 
 
 class DateTime(Field):
