@@ -1,7 +1,7 @@
 import datetime
 import decimal
 import uuid
-from typing import Any, Optional, cast
+from typing import Any, Optional
 from pynamo import _pynamo
 
 
