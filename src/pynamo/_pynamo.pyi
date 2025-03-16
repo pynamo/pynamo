@@ -1,0 +1,3 @@
+from typing import Any, Optional
+
+def deserialize_integer(value: Any) -> Optional[int]: ...

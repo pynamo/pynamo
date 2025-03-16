@@ -2,6 +2,7 @@ import datetime
 import decimal
 import uuid
 from typing import Any, Optional
+from pynamo._pynamo import deserialize_integer
 
 
 class Field:
@@ -126,9 +127,7 @@ class Integer(Field):
 
     @staticmethod
     def deserialize(value: Optional[Any]) -> Optional[int]:
-        if value is None:
-            return None
-        return int(value)
+        return deserialize_integer(value)
 
 
 class DateTime(Field):
