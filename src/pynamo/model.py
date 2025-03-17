@@ -13,7 +13,6 @@ from .attribute import Attribute, InstrumentedAttribute
 from .constants import DEFERRED_ATTRIBUTE_KEY, PRIMARY_INDEX
 from .table import Table
 
-from . import _pynamo
 
 models: Dict[str, Any] = {}
 
@@ -242,7 +241,13 @@ class Model(metaclass=BaseMeta):
         Returns:
             Any: The extracted value or None if the format is invalid.
         """
-        return _pynamo.extract_dynamodb_value(attr_dict)
+        if not attr_dict:
+            return None
+
+        if "NULL" in attr_dict:
+            return None
+
+        return next(iter(attr_dict.values()), None)
 
     @classmethod
     def from_dynamodb_item(cls, item_dict: Dict[str, Any]) -> "Model":
