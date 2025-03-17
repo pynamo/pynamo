@@ -13,7 +13,6 @@ dev-dependencies = [
     "pytest-coverage>=0.0",
     "pytest>=8.3.5",
     "ruff>=0.9.9",
-    "setuptools>=76.0.0",
     "sphinx>=7.4.7",
 ]
 
@@ -21,9 +20,5 @@ dev-dependencies = [
 line-length = 80
 
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-packages = ["pynamo"]
+requires = ["flit_core>=3.4"]
+build-backend = "flit_core.buildapi"
