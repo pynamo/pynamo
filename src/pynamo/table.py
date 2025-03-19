@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, Dict, Optional, Set, Union
+from typing import TYPE_CHECKING, Dict, Optional, Set, Union, Type
 
 if TYPE_CHECKING:
     from .attribute import Attribute
+    from .fields import Field
 
 
 from .constants import DEFERRED_ATTRIBUTE_KEY, PRIMARY_INDEX
@@ -39,6 +40,11 @@ class PrimaryIndex:
         if self.sort_key and self.sort_key.key == DEFERRED_ATTRIBUTE_KEY:
             raise TypeError(
                 "Attribute key required for primary index ie: Attribute(<key>, <type>)"
+            )
+
+        if self.sort_key and self.sort_key.key == self.partition_key.key:
+            raise TypeError(
+                "Partition key and sort key must have different names."
             )
 
 
@@ -88,6 +94,8 @@ class Table:
 
         self.indexes: Dict[str, list[Optional[str]]] = {}
 
+        field_types: Dict[str, Type["Field"]] = {}
+
         attribute_names: Set[str] = set()
         index_names: Set[str] = set()
 
@@ -99,15 +107,35 @@ class Table:
 
             self.indexes.setdefault(arg.name, keys)
 
+            if arg.partition_key:
+                if arg.partition_key.key in field_types:
+                    if (
+                        field_types[arg.partition_key.key]
+                        != arg.partition_key.attribute_type
+                    ):
+                        raise TypeError("Attribute type mismatch")
+
+                else:
+                    field_types[arg.partition_key.key] = (
+                        arg.partition_key.attribute_type
+                    )
+
             if arg.sort_key:
-                if arg.sort_key.key in attribute_names:
-                    raise TypeError(f"{arg.sort_key.key} already exists")
-                attribute_names.add(arg.sort_key.key)
+                if arg.sort_key.key in field_types:
+                    if (
+                        field_types[arg.sort_key.key]
+                        != arg.sort_key.attribute_type
+                    ):
+                        raise TypeError("Attribute type mismatch")
+
+                else:
+                    field_types[arg.sort_key.key] = arg.sort_key.attribute_type
 
             if arg.partition_key:
-                if arg.partition_key.key in attribute_names:
-                    raise TypeError(f"{arg.partition_key.key} already exists")
                 attribute_names.add(arg.partition_key.key)
+
+            if arg.sort_key:
+                attribute_names.add(arg.sort_key.key)
 
             if arg.name in index_names:
                 raise TypeError("Primary index already defined")
