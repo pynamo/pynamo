@@ -16,6 +16,8 @@ class Query:
         self.table_name = None
         self.table: Optional["Table"] = None
         self.model: Optional[Type["Model"]] = None
+        self.partition_key: Optional[str] = None
+        self.sort_key: Optional[str] = None
 
     def _set_key(
         self,
@@ -75,8 +77,6 @@ class Query:
     @classmethod
     def where(cls, *args: "Expression"):
         q_instance = cls()
-        q_instance.partition_key = None
-        q_instance.sort_key = None
 
         for exp in args:
             model = exp.left.model_cls

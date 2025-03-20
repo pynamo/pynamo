@@ -319,7 +319,7 @@ class Model(metaclass=BaseMeta):
                     if not attr.attribute.nullable:
                         raise TypeError(f"{key} is empty and nullable=False")
 
-                mapped_columns: List[Optional[str]] = (
+                mapped_columns: Tuple[Optional[str]] = (
                     self.forward_mapped_columns(attr.attribute.key)
                 )
 
