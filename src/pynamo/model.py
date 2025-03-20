@@ -20,7 +20,7 @@ models: Dict[str, Any] = {}
 class BaseMeta(type):
     __table__: Optional[Table] = None
     __abstract__: bool = False
-    __forward_table_mapper__: Dict[str, List[Any]] = {}
+    __forward_table_mapper__: Dict[str, Tuple[Any]] = {}
     __reverse_table_mapper__: Dict[Any, str] = {}
 
     def __new__(
@@ -160,7 +160,7 @@ class BaseMeta(type):
                     raise TypeError(
                         f"Attribute '{key}' defined as a sort key, but no sort key defined in {table.name}.{value.index_name}"
                     )
-                forward_table_mapper[value.key] = (column_names[1], None)
+                forward_table_mapper[value.key] = (None, column_names[1])
                 reverse_table_mapper[column_names[1]] = value.key
                 index_map[value.index_name][1] = value.key
             else:
@@ -397,9 +397,9 @@ class Model(metaclass=BaseMeta):
         return {attr: getattr(self, attr) for attr in self.modified_attrs}
 
     @classmethod
-    def forward_mapped_columns(cls, col_name: str) -> List[Any]:
+    def forward_mapped_columns(cls, col_name: str) -> Tuple[Any, ...]:
         # model -> DynamoDB
-        return cls.__forward_table_mapper__.get(col_name, [col_name, None])
+        return cls.__forward_table_mapper__.get(col_name, (col_name, None))
 
     @classmethod
     def reversed_mapped_column(cls, key: str) -> str:
