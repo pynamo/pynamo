@@ -24,12 +24,16 @@ def test_query():
 
     assert q.to_dynamodb() == {
         "TableName": "mytable",
-        "KeyConditionExpression": "PK = :PK AND SK = :SK",
+        "ExpressionAttributeNames": {
+            "#ATTR0": "PK",
+            "#ATTR1": "SK",
+        },
+        "KeyConditionExpression": "#ATTR0 = :ATTR0 AND #ATTR1 = :ATTR1",
         "ExpressionAttributeValues": {
-            ":PK": {
+            ":ATTR0": {
                 "S": "123",
             },
-            ":SK": {
+            ":ATTR1": {
                 "S": "2025-01-01",
             },
         },

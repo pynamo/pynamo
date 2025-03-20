@@ -66,6 +66,8 @@ class UpdateItem(Operation):
 
         expressions: list[str] = []
 
+        substitued_counter = 0
+
         for attr_name in self.obj.modified_attrs:
             attr = self.obj.__class__.__dict__[attr_name]
 
@@ -76,8 +78,6 @@ class UpdateItem(Operation):
                     raise ValueError(f"{attr_name} cannot be empty")
 
             mapped_columns = self.obj.forward_mapped_columns(attr.attribute.key)
-
-            substitued_counter = 0
 
             col_name: str
 

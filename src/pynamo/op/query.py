@@ -89,24 +89,40 @@ class Query:
         if self.model.__table__ is None:
             raise TypeError("table required")
 
-        where_clauses: List[str] = []
         attribute_values: Dict[str, Any] = {}
+
+        expression_attribute_names: Dict[Any, Any] = {}
+        expression_attribute_values: Dict[Any, Any] = {}
+
+        expressions: list[str] = []
+
+        substitued_counter = 0
 
         for column, operator, bind_param in self._conditions:
             cols = self.model.forward_mapped_columns(column.key)
 
-            for col_name in cols:
-                if col_name is None:
-                    continue
-                where_clauses.append(f"{col_name} {operator} :{col_name}")
-                attribute_values[f":{col_name}"] = {
-                    column.attribute_type.dynamodb_descriptor: bind_param._value
+            col_name: str
+
+            for col_name in filter(None, cols):
+                substitued = f"ATTR{substitued_counter}"
+
+                expressions.append(f"#{substitued} {operator} :{substitued}")
+                expression_attribute_names[f"#{substitued}"] = col_name
+                expression_attribute_values[f":{substitued}"] = {
+                    column.attribute_type.dynamodb_descriptor: bind_param.value
                 }
-        exp = " AND ".join(where_clauses)
+
+                attribute_values[f":{substitued}"] = {
+                    column.attribute_type.dynamodb_descriptor: bind_param.value
+                }
+
+                substitued_counter += 1
+        exp = " AND ".join(expressions)
         query_params = {
             "TableName": self.model.__table__.name,
             "KeyConditionExpression": exp,
-            "ExpressionAttributeValues": attribute_values,
+            "ExpressionAttributeNames": expression_attribute_names,
+            "ExpressionAttributeValues": expression_attribute_values,
         }
         if start_key:
             query_params["ExclusiveStartKey"] = start_key
