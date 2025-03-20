@@ -1,7 +1,6 @@
 from typing import (
     Any,
     Dict,
-    List,
     Optional,
     Set,
     Tuple,
@@ -21,6 +20,7 @@ class BaseMeta(type):
     __abstract__: bool = False
     __forward_table_mapper__: Dict[str, Tuple[Any]] = {}
     __reverse_table_mapper__: Dict[Any, str] = {}
+    __index_name__: Optional[str] = None
 
     def __new__(
         cls,
@@ -193,6 +193,7 @@ class BaseMeta(type):
         dct["__table__"] = table
         dct["__forward_table_mapper__"] = forward_table_mapper
         dct["__reverse_table_mapper__"] = reverse_table_mapper
+        # dct["__index_name__"] =
         model_class = super().__new__(cls, name, bases, dct)
 
         for key, value in model_class.__dict__.items():
@@ -205,6 +206,7 @@ class BaseMeta(type):
 class Model(metaclass=BaseMeta):
     __abstract__: Optional[bool] = False
     __table__: Optional[Table] = None
+    __index_name__: Optional[str] = None
 
     def __init__(self, **kwargs: Any):
         self._original_state: Dict[str, Any] = {}

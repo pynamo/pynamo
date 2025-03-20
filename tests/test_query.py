@@ -20,7 +20,7 @@ def test_query():
         id = Attribute(String, partition_key=True)
         date = Attribute(DateTime, sort_key=True)
 
-    q = Query.where(Foo.id == "123", Foo.date == "2025-01-01")
+    q = Query(Foo).where(Foo.id == "123", Foo.date == "2025-01-01")
 
     assert q.to_dynamodb() == {
         "TableName": "mytable",

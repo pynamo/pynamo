@@ -176,3 +176,34 @@ def test_model_ref():
     foo = Foo(id="123", name="silly name")
 
     assert foo.ref == ("Foo", "123", None)
+
+
+def test_model_index_name_default():
+    mytable = Table(
+        "mytable",
+        PrimaryIndex(Attribute("PK", String)),
+    )
+
+    class Foo(Model):
+        __table__ = mytable
+
+        id = Attribute(String, partition_key=True)
+        name = Attribute(String)
+
+    assert Foo.__index_name__ is None
+
+
+def test_model_index_name_specified():
+    mytable = Table(
+        "mytable",
+        PrimaryIndex(Attribute("PK", String)),
+    )
+
+    class Foo(Model):
+        __table__ = mytable
+        __index_name__ = "GSI1"
+
+        id = Attribute(String, partition_key=True)
+        name = Attribute(String)
+
+    assert Foo.__index_name__ == "GSI1"

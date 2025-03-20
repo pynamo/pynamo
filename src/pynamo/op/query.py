@@ -3,19 +3,19 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 if TYPE_CHECKING:
     from ..attribute import Attribute, BindParameter, Expression
     from ..model import Model
-    from ..table import Table
+
+from ..constants import PRIMARY_INDEX
 
 
 class Query:
     def __init__(
         self,
-        index_name: Optional[str] = None,
+        model: Type["Model"],
     ):
+        self.model = model
         self._conditions: List[Tuple["Attribute", str, "BindParameter"]] = []
-        self.index_name = index_name
-        self.table_name = None
-        self.table: Optional["Table"] = None
-        self.model: Optional[Type["Model"]] = None
+        # self.table_name = None
+        # self.table: Optional["Table"] = None
         self.partition_key: Optional[str] = None
         self.sort_key: Optional[str] = None
 
@@ -25,84 +25,54 @@ class Query:
         key_name: str,
         is_partition: bool,
     ):
-        if self.table is None:
-            raise TypeError("Table")
         if key_value:
-            if self.index_name is not None:
-                keys = self.table.indexes.get(self.index_name)
-                if not keys:
-                    raise TypeError(
-                        f"Index '{self.index_name}' not found in table '{self.table.name}'"
-                    )
+            if self.model.__table__ is None:
+                raise TypeError("table required")
 
-                expected_key = keys[0] if is_partition else keys[1]
+            index_name = self.model.__index_name__ or PRIMARY_INDEX
 
-                if key_value != expected_key:
-                    raise TypeError(
-                        f"Attribute '{key_name}' is not part of index '{self.index_name}'"
-                    )
-                else:
-                    if is_partition:
-                        if self.partition_key:
-                            raise TypeError(
-                                f"Duplicate partition key: {key_name}"
-                            )
-                        else:
-                            self.partition_key = key_name
-
-                    if not is_partition:
-                        if self.sort_key:
-                            raise TypeError(f"Duplicate sort key {key_name}")
-                        else:
-                            self.sort_key = key_name
-
-            else:
-                # Check against all indexes
-                valid = any(
-                    key_value == keys[0] or key_value == keys[1]
-                    for keys in self.table.indexes.values()
+            keys = self.model.__table__.indexes.get(index_name)
+            if not keys:
+                raise TypeError(
+                    f"Index '{index_name}' not found in table '{self.model.__table__.name}'"
                 )
-                if not valid:
-                    raise TypeError(
-                        f"Attribute '{key_name}' is not part of any index on table '{self.table.name}'"
-                    )
 
-                # If valid, set the index
-                for idx, keys in self.table.indexes.items():
-                    expected_key = keys[0] if is_partition else keys[1]
-                    if key_value == expected_key:
-                        self.index_name = idx
-                        return
+            expected_key = keys[0] if is_partition else keys[1]
 
-    @classmethod
-    def where(cls, *args: "Expression"):
-        q_instance = cls()
+            if key_value != expected_key:
+                raise TypeError(
+                    f"Attribute '{key_name}' is not part of index '{index_name}'"
+                )
+            else:
+                if is_partition:
+                    if self.partition_key:
+                        raise TypeError(f"Duplicate partition key: {key_name}")
+                    else:
+                        self.partition_key = key_name
+
+                if not is_partition:
+                    if self.sort_key:
+                        raise TypeError(f"Duplicate sort key {key_name}")
+                    else:
+                        self.sort_key = key_name
+
+    def where(self, *args: "Expression"):
+        if getattr(self, "model") is None:
+            raise TypeError("Model required")
 
         for exp in args:
-            model = exp.left.model_cls
-            if model is None:
-                raise TypeError("Expression model_cls is not defined")
+            # attr_model = exp.left.model_cls
+            if self.model != exp.left.model_cls:
+                raise TypeError("Differing model classes")
 
-            if model.__table__ is None:
-                raise TypeError(f"Cannot query abstract class ({model})")
+            mapped_columns = self.model.forward_mapped_columns(exp.left.key)
 
-            q_instance.model = model
-
-            if q_instance.table is None:
-                q_instance.table = model.__table__
-            elif q_instance.table.name != model.__table__.name:
-                raise TypeError(
-                    f"Cannot query across multiple tables: {q_instance.table.name} & {model.__table__}"
-                )
-
-            mapped_columns = model.forward_mapped_columns(exp.left.key)
-
-            q_instance._set_key(
+            self._set_key(
                 mapped_columns[0],
                 exp.left.key,
                 is_partition=True,
             )
-            q_instance._set_key(
+            self._set_key(
                 mapped_columns[1],
                 exp.left.key,
                 is_partition=False,
@@ -111,16 +81,13 @@ class Query:
             column = exp.left
             operator = exp.operator
             bind_param = exp.right
-            q_instance._conditions.append((column, operator, bind_param))
+            self._conditions.append((column, operator, bind_param))
 
-        return q_instance
+        return self
 
     def to_dynamodb(self, start_key: Any = None) -> Dict[str, Any]:
-        if not self.table:
-            raise TypeError("abstract")
-
-        if self.model is None:
-            raise TypeError("Model")
+        if self.model.__table__ is None:
+            raise TypeError("table required")
 
         where_clauses: List[str] = []
         attribute_values: Dict[str, Any] = {}
@@ -137,7 +104,7 @@ class Query:
                 }
         exp = " AND ".join(where_clauses)
         query_params = {
-            "TableName": self.table.name,
+            "TableName": self.model.__table__.name,
             "KeyConditionExpression": exp,
             "ExpressionAttributeValues": attribute_values,
         }
