@@ -1,9 +1,9 @@
-from pynamo.fields import Date
+import datetime
 from typing import Any
 
-import datetime
-
 import pytest
+
+from pynamo.fields import Date
 
 
 @pytest.mark.parametrize(

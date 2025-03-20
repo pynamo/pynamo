@@ -13,7 +13,6 @@ from .attribute import Attribute, InstrumentedAttribute
 from .constants import DEFERRED_ATTRIBUTE_KEY, PRIMARY_INDEX
 from .table import Table
 
-
 models: Dict[str, Any] = {}
 
 

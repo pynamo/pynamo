@@ -1,10 +1,10 @@
 from pynamo import (
     Attribute,
     Model,
-    Table,
     PrimaryIndex,
+    Table,
 )
-from pynamo.fields import String, DateTime
+from pynamo.fields import DateTime, String
 from pynamo.op import Query
 
 

@@ -1,7 +1,6 @@
 from pynamo import Attribute
-from pynamo.fields import String
-
 from pynamo.constants import DEFERRED_ATTRIBUTE_KEY
+from pynamo.fields import String
 
 
 def test_attribute_deferred_type():

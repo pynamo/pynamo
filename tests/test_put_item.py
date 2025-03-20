@@ -1,7 +1,6 @@
-from pynamo import Attribute, Model, Table, PrimaryIndex
-from pynamo.op import PutItem
-
+from pynamo import Attribute, Model, PrimaryIndex, Table
 from pynamo.fields import String
+from pynamo.op import PutItem
 
 
 def test_put_item():

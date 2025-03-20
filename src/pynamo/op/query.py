@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Optional, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 if TYPE_CHECKING:
     from ..attribute import Attribute, BindParameter, Expression
-    from ..table import Table
     from ..model import Model
+    from ..table import Table
 
 
 class Query:

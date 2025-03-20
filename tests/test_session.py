@@ -1,10 +1,8 @@
-from pynamo.session import ScopedSession, SessionMaker, Session
-
-from pynamo import Model, Attribute, Table, PrimaryIndex, GetItem, PutItem
-from pynamo.fields import String
-
-
 from typing import Any
+
+from pynamo import Attribute, GetItem, Model, PrimaryIndex, PutItem, Table
+from pynamo.fields import String
+from pynamo.session import ScopedSession, Session, SessionMaker
 
 
 def test_scoped_session():

@@ -1,8 +1,8 @@
-from pynamo.fields import Boolean
 from typing import Any
 
-
 import pytest
+
+from pynamo.fields import Boolean
 
 
 @pytest.mark.parametrize(

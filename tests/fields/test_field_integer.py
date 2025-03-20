@@ -1,8 +1,8 @@
-from pynamo.fields import Integer
 from typing import Any
 
-
 import pytest
+
+from pynamo.fields import Integer
 
 
 @pytest.mark.parametrize(

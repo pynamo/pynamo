@@ -1,8 +1,9 @@
-from pynamo.fields import UUID
-from typing import Any
 import uuid
+from typing import Any
 
 import pytest
+
+from pynamo.fields import UUID
 
 
 @pytest.mark.parametrize(

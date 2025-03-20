@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional, Set, Union, Type
+from typing import TYPE_CHECKING, Dict, Optional, Set, Type, Union
 
 if TYPE_CHECKING:
     from .attribute import Attribute

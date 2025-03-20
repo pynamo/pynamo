@@ -1,8 +1,9 @@
-from pynamo.fields import Decimal
+import decimal
 from typing import Any
 
-import decimal
 import pytest
+
+from pynamo.fields import Decimal
 
 
 @pytest.mark.parametrize(

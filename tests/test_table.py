@@ -1,14 +1,14 @@
+import pytest
+
 from pynamo import (
     GlobalSecondaryIndex,
     LocalSecondaryIndex,
     PrimaryIndex,
     Table,
 )
-
-from pynamo.constants import PRIMARY_INDEX
-from pynamo.fields import String, Integer
 from pynamo.attribute import Attribute
-import pytest
+from pynamo.constants import PRIMARY_INDEX
+from pynamo.fields import Integer, String
 
 
 def test_table():

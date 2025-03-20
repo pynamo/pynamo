@@ -1,6 +1,6 @@
-from pynamo import Attribute, Model, Table, PrimaryIndex
-from pynamo.op import DeleteItem
+from pynamo import Attribute, Model, PrimaryIndex, Table
 from pynamo.fields import String
+from pynamo.op import DeleteItem
 
 
 def test_delete_item_from_model_instance():

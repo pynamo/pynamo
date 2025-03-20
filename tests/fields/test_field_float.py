@@ -1,8 +1,8 @@
-from pynamo.fields import Float
 from typing import Any
 
-
 import pytest
+
+from pynamo.fields import Float
 
 
 @pytest.mark.parametrize(

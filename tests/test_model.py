@@ -1,4 +1,4 @@
-from pynamo import Attribute, Model, Table, PrimaryIndex
+from pynamo import Attribute, Model, PrimaryIndex, Table
 from pynamo.fields import String
 
 
