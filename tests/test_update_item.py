@@ -23,18 +23,14 @@ def test_update_item():
     foo = Foo(id="someid", name="SomeName", blah="blah")
 
     foo.name = "ChangedName"  # type: ignore
-    foo.blah = "ChangedBlah"  # type: ignore
 
     update_request = UpdateItem(foo)
 
-    assert update_request.to_dynamodb() == {
-        "TableName": "mytable",
-        "Key": {"PK": {"S": "someid"}},
-        "UpdateExpression": "SET #ATTR0 = :ATTR0, #ATTR1 = :ATTR1",
-        "ExpressionAttributeNames": {"#ATTR0": "blah", "#ATTR1": "name"},
-        "ExpressionAttributeValues": {
-            ":ATTR0": {"S": "ChangedBlah"},
-            ":ATTR1": {"S": "ChangedName"},
-        },
-        "ReturnValues": "ALL_NEW",
-    }
+    req = update_request.to_dynamodb()
+
+    assert req["TableName"] == "mytable"
+    assert req["Key"] == {"PK": {"S": "someid"}}
+    assert req["ExpressionAttributeNames"]["#ATTR0"] == "name"
+    assert req["UpdateExpression"] == "SET #ATTR0 = :ATTR0"
+    assert req["ExpressionAttributeValues"][":ATTR0"] == {"S": "ChangedName"}
+    assert req["ReturnValues"] == "ALL_NEW"

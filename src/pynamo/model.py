@@ -31,9 +31,6 @@ class BaseMeta(type):
         if name in models:
             raise TypeError(f"Model {name} exists")
         if not dct.get("__table__"):
-            # if not dct["__abstract__"]:
-            #    raise TypeError("__abstract__ must be True if no __table__")
-
             dct["__forward_table_mapper__"] = {}
             dct["__reverse_table_mapper__"] = {}
             return super().__new__(cls, name, bases, dct)
@@ -193,7 +190,6 @@ class BaseMeta(type):
         dct["__table__"] = table
         dct["__forward_table_mapper__"] = forward_table_mapper
         dct["__reverse_table_mapper__"] = reverse_table_mapper
-        # dct["__index_name__"] =
         model_class = super().__new__(cls, name, bases, dct)
 
         for key, value in model_class.__dict__.items():

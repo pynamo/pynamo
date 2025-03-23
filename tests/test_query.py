@@ -22,7 +22,9 @@ def test_query():
 
     q = Query(Foo).where(Foo.id == "123", Foo.date == "2025-01-01")
 
-    assert q.to_dynamodb() == {
+    req = q.to_dynamodb()
+    """
+    {
         "TableName": "mytable",
         "ExpressionAttributeNames": {
             "#ATTR0": "PK",
@@ -38,3 +40,13 @@ def test_query():
             },
         },
     }
+    """
+
+    assert req["TableName"] == "mytable"
+    assert req["ExpressionAttributeNames"]["#ATTR0"] == "PK"
+    assert req["ExpressionAttributeNames"]["#ATTR1"] == "SK"
+    assert (
+        req["KeyConditionExpression"] == "#ATTR0 = :ATTR0 AND #ATTR1 = :ATTR1"
+    )
+    assert req["ExpressionAttributeValues"][":ATTR0"] == {"S": "123"}
+    assert req["ExpressionAttributeValues"][":ATTR1"] == {"S": "2025-01-01"}

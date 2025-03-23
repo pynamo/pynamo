@@ -1,4 +1,12 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+)
 
 if TYPE_CHECKING:
     from ..attribute import Attribute, BindParameter, Expression
@@ -14,8 +22,7 @@ class Query:
     ):
         self.model = model
         self._conditions: List[Tuple["Attribute", str, "BindParameter"]] = []
-        # self.table_name = None
-        # self.table: Optional["Table"] = None
+
         self.partition_key: Optional[str] = None
         self.sort_key: Optional[str] = None
 
@@ -89,8 +96,6 @@ class Query:
         if self.model.__table__ is None:
             raise TypeError("table required")
 
-        attribute_values: Dict[str, Any] = {}
-
         expression_attribute_names: Dict[Any, Any] = {}
         expression_attribute_values: Dict[Any, Any] = {}
 
@@ -109,10 +114,6 @@ class Query:
                 expressions.append(f"#{substitued} {operator} :{substitued}")
                 expression_attribute_names[f"#{substitued}"] = col_name
                 expression_attribute_values[f":{substitued}"] = {
-                    column.attribute_type.dynamodb_descriptor: bind_param.value
-                }
-
-                attribute_values[f":{substitued}"] = {
                     column.attribute_type.dynamodb_descriptor: bind_param.value
                 }
 

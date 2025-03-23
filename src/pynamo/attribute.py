@@ -98,8 +98,8 @@ class Attribute:
         if self.primary_key or self.partition_key or self.sort_key:
             self.index_name = index_name or PRIMARY_INDEX
 
-    def __set_name__(self, owner, name):
-        self.model_cls = name
+    # def __set_name__(self, owner, name):
+    #    self.model_cls = name
 
     def __eq__(self, other: Any) -> "Expression":  # type: ignore
         return Expression(self, "=", BindParameter(other))
