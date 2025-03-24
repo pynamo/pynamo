@@ -94,12 +94,17 @@ class Table:
 
         self.indexes: Dict[str, list[Optional[str]]] = {}
 
+        self.primary_index: Optional[PrimaryIndex] = None
+
         field_types: Dict[str, Type["Field"]] = {}
 
         attribute_names: Set[str] = set()
         index_names: Set[str] = set()
 
         for arg in args:
+            if isinstance(arg, PrimaryIndex):
+                self.primary_index = arg
+
             keys = [
                 arg.partition_key.key if arg.partition_key else None,
                 arg.sort_key.key if arg.sort_key else None,

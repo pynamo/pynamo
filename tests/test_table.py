@@ -41,6 +41,8 @@ def test_table():
         "GSI1": ["GSI1PK", "GSI1SK"],
     }
 
+    assert isinstance(my_table.primary_index, PrimaryIndex)
+
 
 def test_table_overlapping_keys():
     my_table = Table(
