@@ -122,7 +122,7 @@ class Attribute:
     def __sub__(self, other: Any) -> "Expression":
         return Expression(self, "-", BindParameter(other))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Attribute({self.attribute_type}, key={self.key})"
 
 
@@ -187,3 +187,6 @@ class InstrumentedAttribute:
                     value = self.attribute.default
 
         instance.__dict__[self.attribute.key] = value
+
+
+__all__ = ["Expression", "BindParameter"]

@@ -4,10 +4,8 @@ if TYPE_CHECKING:
     from ..attribute import Expression
     from ..model import Model
 
-from .base import Operation
 
-
-class UpdateItem(Operation):
+class UpdateItem:
     def __init__(self, obj: "Model"):
         """
         Initializes a PutItem instance.

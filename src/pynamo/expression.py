@@ -9,7 +9,7 @@ class BindParameter:
         self._value = value
 
     @property
-    def value(self):
+    def value(self) -> Any:
         return self._value
 
 
@@ -19,5 +19,5 @@ class Expression:
         self.operator = operator
         self.right = right
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.left.__class__} {self.operator} {self.right}"

@@ -19,6 +19,9 @@ dev-dependencies = [
 [tool.ruff]
 line-length = 80
 
+[tool.mypy]
+strict = true
+
 [build-system]
 requires = ["flit_core>=3.4"]
 build-backend = "flit_core.buildapi"

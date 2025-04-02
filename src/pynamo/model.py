@@ -22,7 +22,7 @@ class BaseMeta(type):
     __reverse_table_mapper__: Dict[Any, str] = {}
     __index_name__: Optional[str] = None
 
-    def __new__(
+    def __new__(  # type: ignore
         cls,
         name: str,
         bases: tuple[type, ...],
@@ -228,7 +228,7 @@ class Model(metaclass=BaseMeta):
             object.__setattr__(self, name, val)
 
     @staticmethod
-    def extract_dynamodb_value(attr_dict: Dict[str, Any]):
+    def extract_dynamodb_value(attr_dict: Dict[str, Any]) -> Optional[str]:
         """
         Extracts the first value from a DynamoDB attribute dictionary safely.
 
@@ -332,41 +332,6 @@ class Model(metaclass=BaseMeta):
 
         return item_data
 
-    def attr_to_dynamodb(self, attr_name: str):
-        attr = self.__class__.__dict__[attr_name]
-        value = getattr(self, attr_name, None)
-
-        value = attr.attribute.attribute_type.serialize(value)
-        if value and attr.attribute.prefix:
-            value = f"{attr.attribute.prefix}{value}"
-
-        if value is None or not value:
-            if attr.attribute.partition_key or attr.attribute.sort_key:
-                raise ValueError(
-                    f"{self.__class__.__name__}.{attr_name} is mapped to an index "
-                    f"({attr.attribute.index_name}) and cannot be empty."
-                    f"You may optionally pass a `default` parameter for the "
-                    f" Attribute() class"
-                )
-            if not attr.attribute.nullable:
-                raise TypeError(f"{attr_name} is empty and nullable=False")
-
-        mapped_columns = self.forward_mapped_columns(attr.attribute.key)
-
-        dynamodb_data: Dict[str, Any] = {}
-
-        col_name: str
-
-        for col_name in filter(None, mapped_columns):
-            if value is None:
-                dynamodb_data[col_name] = {
-                    "NULL": True,
-                }
-            else:
-                dynamodb_data[col_name] = {
-                    attr.attribute.attribute_type.dynamodb_descriptor: value
-                }
-
     @property
     def ref(self) -> Optional[Tuple[str, Any, Any]]:
         if self.__class__.__table__ is None:
@@ -389,7 +354,7 @@ class Model(metaclass=BaseMeta):
             pk_sort_key_val,
         )
 
-    def modified_attributes(self):
+    def modified_attributes(self) -> Dict[str, Any]:
         """Returns a dictionary of only modified attributes."""
         return {attr: getattr(self, attr) for attr in self.modified_attrs}
 

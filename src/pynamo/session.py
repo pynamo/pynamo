@@ -4,6 +4,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    List,
     Optional,
     Set,
     Union,
@@ -19,27 +20,28 @@ if TYPE_CHECKING:
         GetItem,
         PutItem,
         Query,
-        TransactWriteItems,
         UpdateItem,
     )
 
+from .op import TransactWriteItems
+
 
 class _ThreadLocalRegistry:
-    def __init__(self, factory_func: Callable[[], Any]):
-        self.factory_func = factory_func
+    def __init__(self, session_factory: Callable[[], "Session"]):
+        self.session_factory = session_factory
         self.registry = threading.local()
 
-    def __call__(self):
+    def __call__(self) -> "Session":
         try:
-            return self.registry.value
+            return cast("Session", self.registry.value)
         except AttributeError:
-            val = self.registry.value = self.factory_func()
+            val = self.registry.value = self.session_factory()
             return val
 
     def active(self) -> bool:
         return hasattr(self.registry, "value")
 
-    def clear(self):
+    def clear(self) -> None:
         try:
             del self.registry.value
         except AttributeError:
@@ -49,11 +51,11 @@ class _ThreadLocalRegistry:
 class _ScopedRegistry:
     def __init__(
         self,
-        factory_func: Callable[[], Any],
+        session_factory: Callable[[], "Session"],
         scope_func: Callable[[], Any],
     ):
-        self.registry: Dict[Any, Any] = {}
-        self.factory_func = factory_func
+        self.registry: Dict[Any, "Session"] = {}
+        self.session_factory = session_factory
         self.scope_func = scope_func
 
     def __call__(self) -> "Session":
@@ -61,12 +63,12 @@ class _ScopedRegistry:
         try:
             return self.registry[key]
         except KeyError:
-            return self.registry.setdefault(key, self.factory_func())
+            return self.registry.setdefault(key, self.session_factory())
 
-    def active(self):
+    def active(self) -> bool:
         return self.scope_func() in self.registry
 
-    def clear(self):
+    def clear(self) -> None:
         try:
             del self.registry[self.scope_func()]
         except KeyError:
@@ -81,7 +83,7 @@ class SessionBase:
         self.objects_to_delete: Dict[Any, "Model"] = {}
         self.raise_on_item_limits = raise_on_item_limits
 
-    def add(self, obj: "Model"):
+    def add(self, obj: "Model") -> None:
         if not obj.ref:
             raise Exception("no ref")
 
@@ -89,20 +91,20 @@ class SessionBase:
             self.object_registry[obj.ref] = obj
             self.objects_to_add.add(obj)
 
-    def delete(self, obj: "Model"):
+    def delete(self, obj: "Model") -> None:
         if not obj.ref:
             raise Exception("no ref")
         self.objects_to_delete[obj.ref] = obj
         self.objects_to_add.discard(obj)
         # self.objects_to_update.pop(obj.ref, None)
 
-    def as_transaction(self):
-        items = []
+    def as_transaction(self) -> TransactWriteItems:
+        items: List[Union[DeleteItem, PutItem, UpdateItem]] = []
 
         for ref, obj in self.objects_to_delete:
             items.append(DeleteItem(obj))
 
-        for ref, obj in self.objects_to_add:
+        for obj in self.objects_to_add:
             if obj.ref not in self.objects_to_delete:
                 items.append(PutItem(obj))
 
@@ -118,7 +120,7 @@ class SessionBase:
 
         return TransactWriteItems(*items)
 
-    def clear(self):
+    def clear(self) -> None:
         self.objects_to_add.clear()
         self.objects_to_delete.clear()
 
@@ -151,7 +153,7 @@ class Session(SessionBase):
         self.object_registry[op.instance.ref] = op.instance
         return op.instance
 
-    def execute(self, op: Union["GetItem", "PutItem", "Query"]) -> "Model":
+    def execute(self, op: Union["GetItem", "PutItem", "Query"]) -> Any:
         if op.__class__.__name__ == "GetItem":
             return self._get_item(cast("GetItem", op))
 
@@ -160,7 +162,7 @@ class Session(SessionBase):
 
         raise NotImplementedError()
 
-    def save(self):
+    def save(self) -> Any:
         transaction = self.as_transaction()
 
         client = self.client
@@ -172,7 +174,7 @@ class AsyncSession(SessionBase):
         super().__init__(**kwargs)
         self.client = client
 
-    async def get_item(self, op: "GetItem"):
+    async def get_item(self, op: "GetItem") -> "Model":
         if op.instance.ref in self.object_registry:
             return op.instance
 
@@ -187,7 +189,7 @@ class AsyncSession(SessionBase):
         self.object_registry[op.instance.ref] = instance
         return instance
 
-    async def execute(self, op: Union["GetItem", "PutItem", "Query"]):
+    async def execute(self, op: Union["GetItem", "PutItem", "Query"]) -> Any:
         if op.__class__.__name__ == "GetItem":
             return await self.get_item(cast("GetItem", op))
         raise NotImplementedError()
@@ -213,7 +215,7 @@ class ScopedSession:
     def __init__(
         self,
         session_factory: SessionMaker,
-        scopefunc: Optional[Callable[[], Any]] = None,
+        scopefunc: Optional[Callable[[], "Session"]] = None,
     ) -> None:
         self.session_factory = session_factory
 
@@ -227,7 +229,7 @@ class ScopedSession:
     def __call__(self) -> Session:
         return self.registry()
 
-    def remove(self):
+    def remove(self) -> None:
         # if self.registry.active():
         #    self.registry().close()
         self.registry.clear()

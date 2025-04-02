@@ -31,7 +31,7 @@ class Query:
         key_value: Optional[str],
         key_name: str,
         is_partition: bool,
-    ):
+    ) -> None:
         if key_value:
             if self.model.__table__ is None:
                 raise TypeError("table required")
@@ -63,7 +63,7 @@ class Query:
                     else:
                         self.sort_key = key_name
 
-    def where(self, *args: "Expression"):
+    def where(self, *args: "Expression") -> "Query":
         if getattr(self, "model") is None:
             raise TypeError("Model required")
 
