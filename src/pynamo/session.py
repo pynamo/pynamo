@@ -101,7 +101,7 @@ class SessionBase:
     def as_transaction(self) -> TransactWriteItems:
         items: List[Union[DeleteItem, PutItem, UpdateItem]] = []
 
-        for ref, obj in self.objects_to_delete:
+        for _, obj in self.objects_to_delete:
             items.append(DeleteItem(obj))
 
         for obj in self.objects_to_add:
@@ -134,7 +134,7 @@ class Session(SessionBase):
         if op.instance.ref in self.object_registry:
             return op.instance
 
-        client_func = getattr(self.client, "get_item")
+        client_func = self.client.get_item
 
         res = client_func(**op.to_dynamodb())
 
@@ -146,7 +146,7 @@ class Session(SessionBase):
         return instance
 
     def _put_item(self, op: "PutItem") -> "Model":
-        client_func = getattr(self.client, "put_item")
+        client_func = self.client.put_item
 
         client_func(**op.to_dynamodb())
 
@@ -178,7 +178,7 @@ class AsyncSession(SessionBase):
         if op.instance.ref in self.object_registry:
             return op.instance
 
-        client_func = getattr(self.client, "get_item")
+        client_func = self.client.get_item
 
         res = await client_func(**op.to_dynamodb())
 

@@ -131,7 +131,8 @@ class BaseMeta(type):
 
                 if not column_names[0]:
                     raise TypeError(
-                        f"`{value.key}` no partition_key defined in {table.name}.{value.index_name}"
+                        f"`{value.key}` no partition_key defined in "
+                        f"{table.name}.{value.index_name}"
                     )
 
                 forward_table_mapper[value.key] = (column_names[0], None)
@@ -154,7 +155,8 @@ class BaseMeta(type):
                     )
                 if not column_names[1]:
                     raise TypeError(
-                        f"Attribute '{key}' defined as a sort key, but no sort key defined in {table.name}.{value.index_name}"
+                        f"Attribute '{key}' defined as a sort key, but no sort "
+                        f"key defined in {table.name}.{value.index_name}"
                     )
                 forward_table_mapper[value.key] = (None, column_names[1])
                 reverse_table_mapper[column_names[1]] = value.key
@@ -176,7 +178,8 @@ class BaseMeta(type):
 
             if partition_key and not index_map[idx_name][0]:
                 raise ValueError(
-                    f"Table '{table.name}' defines a partition key '{partition_key}' "
+                    f"Table '{table.name}' defines a partition key '"
+                    f"{partition_key}' "
                     f"in index '{idx_name}'"
                     f"but no corresponding mapping was found in model '{name}'."
                 )
@@ -192,7 +195,7 @@ class BaseMeta(type):
         dct["__reverse_table_mapper__"] = reverse_table_mapper
         model_class = super().__new__(cls, name, bases, dct)
 
-        for key, value in model_class.__dict__.items():
+        for _, value in model_class.__dict__.items():
             if isinstance(value, InstrumentedAttribute):
                 value.attribute.model_cls = cast(Type["Model"], model_class)
 
@@ -233,7 +236,8 @@ class Model(metaclass=BaseMeta):
         Extracts the first value from a DynamoDB attribute dictionary safely.
 
         Args:
-            attr_dict (dict): A DynamoDB-style attribute dictionary (e.g., {"S": "blah"}).
+            attr_dict (dict): A DynamoDB-style attribute dictionary
+            (e.g., {"S": "blah"}).
 
         Returns:
             Any: The extracted value or None if the format is invalid.
@@ -282,7 +286,8 @@ class Model(metaclass=BaseMeta):
         according to DynamoDB attribute types.
 
         Returns:
-            dict: A dictionary formatted for DynamoDB's PutItem operation, containing:
+            dict: A dictionary formatted for DynamoDB's PutItem operation,
+            containing:
                 - "TableName": The name of the DynamoDB table.
                 - "Item": A dictionary of attributes formatted for DynamoDB.
 
@@ -311,7 +316,8 @@ class Model(metaclass=BaseMeta):
                 if value is None or not value:
                     if attr.attribute.partition_key or attr.attribute.sort_key:
                         raise ValueError(
-                            f"{key} (index: {attr.attribute.index_name}) cannot be empty",
+                            f"{key} (index: {attr.attribute.index_name}) "
+                            "cannot be empty",
                         )
                     if not attr.attribute.nullable:
                         raise TypeError(f"{key} is empty and nullable=False")
@@ -327,7 +333,7 @@ class Model(metaclass=BaseMeta):
                         }
                     else:
                         item_data[col_name] = {
-                            attr.attribute.attribute_type.dynamodb_descriptor: value
+                            attr.attribute.attribute_type.dynamodb_descriptor: value  # noqa
                         }
 
         return item_data
@@ -415,6 +421,6 @@ class Model(metaclass=BaseMeta):
                 sk_val = f"{sk_inst_attr.attribute.prefix}{sk_val}"
 
             dynamodb_data[pk_cols[1]] = {
-                sk_inst_attr.attribute.attribute_type.dynamodb_descriptor: sk_val,
+                sk_inst_attr.attribute.attribute_type.dynamodb_descriptor: sk_val,  # noqa
             }
         return dynamodb_data

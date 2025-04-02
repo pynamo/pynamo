@@ -32,14 +32,16 @@ class PrimaryIndex:
         self.name = PRIMARY_INDEX
         if partition_key.key == DEFERRED_ATTRIBUTE_KEY:
             raise TypeError(
-                "Attribute key required for primary index ie: Attribute(<key>, <type>)"
+                "Attribute key required for primary index ie: "
+                "Attribute(<key>, <type>)"
             )
         self.partition_key: "Attribute" = partition_key
 
         self.sort_key: Optional["Attribute"] = args[0] if args else None
         if self.sort_key and self.sort_key.key == DEFERRED_ATTRIBUTE_KEY:
             raise TypeError(
-                "Attribute key required for primary index ie: Attribute(<key>, <type>)"
+                "Attribute key required for primary index ie: "
+                "Attribute(<key>, <type>)"
             )
 
         if self.sort_key and self.sort_key.key == self.partition_key.key:
@@ -58,7 +60,8 @@ class LocalSecondaryIndex:
 
     Args:
         name (str): The name of the local secondary index.
-        sort_key (Attribute): The attribute that serves as the sort key for the LSI.
+        sort_key (Attribute): The attribute that serves as the sort key for the
+        LSI.
 
     """
 

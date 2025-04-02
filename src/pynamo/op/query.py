@@ -41,14 +41,16 @@ class Query:
             keys = self.model.__table__.indexes.get(index_name)
             if not keys:
                 raise TypeError(
-                    f"Index '{index_name}' not found in table '{self.model.__table__.name}'"
+                    f"Index '{index_name}' not found in table '"
+                    "{self.model.__table__.name}'"
                 )
 
             expected_key = keys[0] if is_partition else keys[1]
 
             if key_value != expected_key:
                 raise TypeError(
-                    f"Attribute '{key_name}' is not part of index '{index_name}'"
+                    f"Attribute '{key_name}' is not part of index '"
+                    "{index_name}'"
                 )
             else:
                 if is_partition:
@@ -64,7 +66,7 @@ class Query:
                         self.sort_key = key_name
 
     def where(self, *args: "Expression") -> "Query":
-        if getattr(self, "model") is None:
+        if self.model is None:
             raise TypeError("Model required")
 
         for exp in args:

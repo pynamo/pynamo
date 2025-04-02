@@ -13,14 +13,17 @@ class Attribute:
     """
     Represents an attribute (column) in a DynamoDB table.
 
-    This class defines the metadata for a DynamoDB attribute, including its key type,
-    indexing options, default values, and nullable constraints. Attributes can serve
-    as primary keys (partition or sort keys) and be indexed for efficient querying.
+    This class defines the metadata for a DynamoDB attribute, including its key
+    type, indexing options, default values, and nullable constraints.
+    Attributes can serve as primary keys (partition or sort keys) and be
+    indexed for efficient querying.
 
     Args:
         *args (Union[str, Type["Field"]]):
-            - If a string is provided, it is treated as the attribute's key name.
-            - If a `Field` type is provided, it defines the attribute's data type.
+            - If a string is provided, it is treated as the attribute's key
+                name.
+            - If a `Field` type is provided, it defines the attribute's data
+                type.
         primary_key (Optional[bool], default=False):
             Specifies whether this attribute is the **Primary Key**.
         partition_key (Optional[bool], default=False):
@@ -28,7 +31,8 @@ class Attribute:
         sort_key (Optional[bool], default=False):
             Specifies whether this attribute is the **Sort Key**.
         index_name (Optional[str], default=None):
-            The name of the index if this attribute is part of a **secondary index**.
+            The name of the index if this attribute is part of a
+                **secondary index**.
         prefix (Optional[str], default=None):
             A prefix added to the attribute value before storing in DynamoDB.
         default (Optional[Union[str, Callable[[], str]]], default=None):
@@ -40,8 +44,10 @@ class Attribute:
     Raises:
         TypeError:
             - If no `Field` type is provided.
-            - If the attribute is incorrectly marked as both a partition key and a sort key.
-            - If the attribute is incorrectly marked as both a primary key and another key type.
+            - If the attribute is incorrectly marked as both a partition key
+                and a sort key.
+            - If the attribute is incorrectly marked as both a primary key and
+                another key type.
 
     Example Usage:
         >>> from pynamo import String, Attribute, DateTime
@@ -98,9 +104,6 @@ class Attribute:
         if self.primary_key or self.partition_key or self.sort_key:
             self.index_name = index_name or PRIMARY_INDEX
 
-    # def __set_name__(self, owner, name):
-    #    self.model_cls = name
-
     def __eq__(self, other: Any) -> "Expression":  # type: ignore
         return Expression(self, "=", BindParameter(other))
 
@@ -139,7 +142,8 @@ class InstrumentedAttribute:
             The `Attribute` instance being instrumented.
 
     Methods:
-        __get__(instance: Optional["Model"], owner: Type["Model"]) -> Optional[Any]:
+        __get__(instance: Optional["Model"], owner: Type["Model"]) ->
+                Optional[Any]:
             Retrieves the value of the attribute from the instance.
             If accessed from the class level, returns the `Attribute` itself.
 
@@ -148,16 +152,7 @@ class InstrumentedAttribute:
             If `None` is assigned and the attribute has a default value,
             the default is used instead.
 
-    Example:
-        >>> from pynamo import Attribute, String
-        >>> class User(Model):
-        >>>     id = InstrumentedAttribute(Attribute("id", String, partition_key=True))
-        >>>     name = InstrumentedAttribute(Attribute("name", String, default="Unknown"))
-        >>>
-        >>> user = User()
-        >>> print(user.name)  # "Unknown" (default value)
-        >>> user.name = "Alice"
-        >>> print(user.name)  # "Alice"
+
     """
 
     def __init__(self, attribute: "Attribute"):

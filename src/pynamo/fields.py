@@ -22,7 +22,8 @@ class Field:
                              values.
         - **Deserialization:** Converts DynamoDB-stored values back into Python
                                objects.
-        - **Validation:** Ensures that values conform to the expected field type.
+        - **Validation:** Ensures that values conform to the expected field
+                          type.
 
     Attributes:
         dynamodb_descriptor (str):

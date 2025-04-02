@@ -18,6 +18,16 @@ dev-dependencies = [
 
 [tool.ruff]
 line-length = 80
+fix = true
+
+[tool.ruff.lint]
+select = [
+    "B",  # flake8-bugbear
+    "E",  # pycodestyle error
+    "F",  # pyflakes
+    "I",  # isort
+    "W",  # pycodestyle warning
+]
 
 [tool.mypy]
 strict = true
