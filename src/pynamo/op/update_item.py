@@ -75,6 +75,10 @@ class UpdateItem:
                 if not attr.attribute.nullable:
                     raise ValueError(f"{attr_name} cannot be empty")
 
+            value = attr.attribute.attribute_type.serialize(value)
+            if value and attr.attribute.prefix:
+                value = f"{attr.attribute.prefix}{value}"
+
             mapped_columns = self.obj.forward_mapped_columns(attr.attribute.key)
 
             col_name: str
@@ -98,7 +102,7 @@ class UpdateItem:
 
         update_expression = f"SET {', '.join(expressions)}"
 
-        dynamodb_request = {
+        dynamodb_request: Dict[str, Any] = {
             "TableName": table_name,
             "Key": self.obj.primary_key,
             "UpdateExpression": update_expression,
