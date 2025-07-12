@@ -275,6 +275,11 @@ class Model(metaclass=BaseMeta):
                     value = value[len(inst_attribute.attribute.prefix) :]
 
             instance.__setattr__(mapped_key, value)
+
+        for key in cls.__reverse_table_mapper__:
+            if key not in item_dict:
+                instance.__setattr__(key, None)
+
         return instance
 
     def to_dynamodb_item(self) -> Dict[str, Any]:
