@@ -3,6 +3,8 @@ from typing import Any
 from pynamo import Attribute, GetItem, Model, PrimaryIndex, PutItem, Table
 from pynamo.fields import String
 from pynamo.session import ScopedSession, Session, SessionMaker
+from pynamo.session import AsyncScopedSession, AsyncSession, AsyncSessionMaker
+import pytest
 
 
 def test_scoped_session():

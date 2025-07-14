@@ -2,11 +2,13 @@ import threading
 from typing import (
     TYPE_CHECKING,
     Any,
+    Awaitable,
     Callable,
     Dict,
     List,
     Optional,
     Set,
+    Type,
     Union,
     cast,
 )
@@ -23,15 +25,17 @@ if TYPE_CHECKING:
         UpdateItem,
     )
 
-from .op import TransactWriteItems
+from .op import DeleteItem, PutItem, TransactWriteItems, UpdateItem
 
 
 class _ThreadLocalRegistry:
-    def __init__(self, session_factory: Callable[[], "Session"]):
+    def __init__(
+        self, session_factory: Callable[[], Union["Session", "AsyncSession"]]
+    ):
         self.session_factory = session_factory
         self.registry = threading.local()
 
-    def __call__(self) -> "Session":
+    def __call__(self) -> Union["Session", "AsyncSession"]:
         try:
             return cast("Session", self.registry.value)
         except AttributeError:
@@ -48,17 +52,43 @@ class _ThreadLocalRegistry:
             pass
 
 
+class _AsyncThreadLocalRegistry:
+    def __init__(
+        self,
+        session_factory: Callable[[], Awaitable["AsyncSession"]],
+    ):
+        self.session_factory = session_factory
+        self.registry = threading.local()
+
+    async def __call__(self) -> "AsyncSession":
+        try:
+            return cast("AsyncSession", self.registry.value)
+        except AttributeError:
+            val = await self.session_factory()
+            self.registry.value = val
+            return val
+
+    def active(self) -> bool:
+        return hasattr(self.registry, "value")
+
+    def clear(self) -> None:
+        try:
+            del self.registry.value
+        except AttributeError:
+            pass
+
+
 class _ScopedRegistry:
     def __init__(
         self,
-        session_factory: Callable[[], "Session"],
+        session_factory: Callable[[], Union["Session", "AsyncSession"]],
         scope_func: Callable[[], Any],
     ):
-        self.registry: Dict[Any, "Session"] = {}
+        self.registry: Dict[Any, Union["Session", "AsyncSession"]] = {}
         self.session_factory = session_factory
         self.scope_func = scope_func
 
-    def __call__(self) -> "Session":
+    def __call__(self) -> Union["Session", "AsyncSession"]:
         key = self.scope_func()
         try:
             return self.registry[key]
@@ -75,11 +105,38 @@ class _ScopedRegistry:
             pass
 
 
+class _AsyncScopedRegistry:
+    def __init__(
+        self,
+        session_factory: Callable[[], Awaitable["AsyncSession"]],
+        scope_func: Callable[[], Any],
+    ):
+        self.registry: Dict[Any, "AsyncSession"] = {}
+        self.session_factory = session_factory
+        self.scope_func = scope_func
+
+    async def __call__(self) -> "AsyncSession":
+        key = await self.scope_func()
+        try:
+            return self.registry[key]
+        except KeyError:
+            val = await self.session_factory()
+            return self.registry.setdefault(key, val)
+
+    def active(self) -> bool:
+        return self.scope_func() in self.registry
+
+    def clear(self) -> None:
+        try:
+            del self.registry[self.scope_func()]
+        except KeyError:
+            pass
+
+
 class SessionBase:
     def __init__(self, raise_on_item_limits: Optional[bool] = False):
         self.object_registry: Dict[Any, "Model"] = {}
         self.objects_to_add: Set["Model"] = set()
-        # self.objects_to_update: Dict[] = {}
         self.objects_to_delete: Dict[Any, "Model"] = {}
         self.raise_on_item_limits = raise_on_item_limits
 
@@ -94,22 +151,20 @@ class SessionBase:
     def delete(self, obj: "Model") -> None:
         if not obj.ref:
             raise Exception("no ref")
-        self.objects_to_delete[obj.ref] = obj
-        self.objects_to_add.discard(obj)
-        # self.objects_to_update.pop(obj.ref, None)
+        self.objects_to_delete[obj] = obj
 
     def as_transaction(self) -> TransactWriteItems:
         items: List[Union[DeleteItem, PutItem, UpdateItem]] = []
 
-        for _, obj in self.objects_to_delete:
+        for obj in self.objects_to_delete:
             items.append(DeleteItem(obj))
 
         for obj in self.objects_to_add:
-            if obj.ref not in self.objects_to_delete:
+            if obj not in self.objects_to_delete:
                 items.append(PutItem(obj))
 
-        for ref, obj in self.object_registry:
-            if ref not in self.objects_to_delete and obj.modified_attributes():
+        for ref, obj in self.object_registry.items():
+            if obj not in self.objects_to_delete and obj.modified_attributes():
                 items.append(UpdateItem(obj))
 
         if (
@@ -174,13 +229,16 @@ class AsyncSession(SessionBase):
         super().__init__(**kwargs)
         self.client = client
 
-    async def get_item(self, op: "GetItem") -> "Model":
+    async def get_item(self, op: "GetItem") -> Optional["Model"]:
         if op.instance.ref in self.object_registry:
             return op.instance
 
         client_func = self.client.get_item
 
-        res = await client_func(**op.to_dynamodb())
+        res = await client_func(op.to_dynamodb())
+
+        if "Item" not in res:
+            return None
 
         model_cls = op.model_cls
 
@@ -194,6 +252,12 @@ class AsyncSession(SessionBase):
             return await self.get_item(cast("GetItem", op))
         raise NotImplementedError()
 
+    async def save(self):
+        transaction = self.as_transaction()
+
+        client = self.client
+        return await client.transact_write_items(transaction.to_dynamodb())
+
 
 class SessionMaker:
     def __init__(self, client_factory: Callable[[], Any]):
@@ -204,8 +268,9 @@ class SessionMaker:
 
 
 class AsyncSessionMaker:
-    def __init__(self, client: Any = None):
+    def __init__(self, client: Any = None, **kwargs: Any):
         self.client = client
+        self.kwargs = kwargs
 
     def __call__(self) -> AsyncSession:
         return AsyncSession(client=self.client)
@@ -214,8 +279,8 @@ class AsyncSessionMaker:
 class ScopedSession:
     def __init__(
         self,
-        session_factory: SessionMaker,
-        scopefunc: Optional[Callable[[], "Session"]] = None,
+        session_factory: Union[SessionMaker, AsyncSessionMaker],
+        scopefunc: Optional[Callable[[], int]] = None,
     ) -> None:
         self.session_factory = session_factory
 
@@ -226,8 +291,32 @@ class ScopedSession:
         else:
             self.registry = _ThreadLocalRegistry(session_factory)
 
-    def __call__(self) -> Session:
+    def __call__(self) -> Union[Session, AsyncSession]:
         return self.registry()
+
+    def remove(self) -> None:
+        # if self.registry.active():
+        #    self.registry().close()
+        self.registry.clear()
+
+
+class AsyncScopedSession:
+    def __init__(
+        self,
+        session_factory: AsyncSessionMaker,
+        scopefunc: Optional[Callable[[], Any]] = None,
+    ) -> None:
+        self.session_factory = session_factory
+
+        self.registry: Union[_AsyncThreadLocalRegistry, _AsyncScopedRegistry]
+
+        if scopefunc:
+            self.registry = _AsyncScopedRegistry(session_factory, scopefunc)
+        else:
+            self.registry = _AsyncThreadLocalRegistry(session_factory)
+
+    async def __call__(self) -> AsyncSession:
+        return await self.registry()
 
     def remove(self) -> None:
         # if self.registry.active():
