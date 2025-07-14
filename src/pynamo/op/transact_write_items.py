@@ -17,11 +17,24 @@ class TransactWriteItems:
         operations_to_dynamodb: List[Dict[str, Any]] = []
 
         for operation in self.operations:
-            if operation.__class__.__name__ == "Put":
+            if operation.__class__.__name__ == "PutItem":
                 operations_to_dynamodb.append(
                     {
                         "Put": operation.to_dynamodb(),
                     }
                 )
-
+            elif operation.__class__.__name__ == "UpdateItem":
+                operations_to_dynamodb.append(
+                    {
+                        "Update": operation.to_dynamodb(),
+                    }
+                )
+            elif operation.__class__.__name__ == "DeleteItem":
+                operations_to_dynamodb.append(
+                    {
+                        "Delete": operation.to_dynamodb(),
+                    }
+                )
+            else:
+                raise NotImplementedError(operation.__class__.__name__)
         return {"TransactItems": operations_to_dynamodb}
