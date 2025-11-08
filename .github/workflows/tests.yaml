@@ -29,30 +29,11 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run tests
-        run: uv run pytest tests --cov=src/pynamo --cov-report=term-missing
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python (Latest Stable)
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.13"
-
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          uv --version
-
-      - name: Install dependencies
-        run: uv sync
-
       - name: Ruff
         run: uv run ruff check src
 
-      - name: MyPy
-        run: uv run mypy src
+      - name: Pyright
+        run: uv run pyright src
+
+      - name: Run tests
+        run: uv run pytest tests --cov=src/pynamo --cov-report=term-missing

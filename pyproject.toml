@@ -9,7 +9,7 @@ dependencies = []
 [tool.uv]
 dev-dependencies = [
     "furo>=2024.8.6",
-    "mypy>=1.15.0",
+    "pyright>=1.1.407",
     "pytest-asyncio>=0.26.0",
     "pytest-coverage>=0.0",
     "pytest>=8.3.5",
@@ -29,10 +29,15 @@ select = [
     "F",  # pyflakes
     "I",  # isort
     "W",  # pycodestyle warning
+    "TID", # tidy imports
+    "COM818", # trailing comma bare tuple
 ]
 
-[tool.mypy]
-strict = true
+[tool.pyright]
+reportMissingTypeStubs = false
+typeCheckingMode = "strict"
+
+
 
 [build-system]
 requires = ["flit_core>=3.4"]

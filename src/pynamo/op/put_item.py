@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, Literal
 
 if TYPE_CHECKING:
-    from ..model import Model
+    from pynamo.model import Model
 
 
 class PutItem:

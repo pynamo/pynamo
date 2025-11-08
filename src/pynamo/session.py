@@ -8,7 +8,6 @@ from typing import (
     List,
     Optional,
     Set,
-    Type,
     Union,
     cast,
 )
@@ -163,7 +162,7 @@ class SessionBase:
             if obj not in self.objects_to_delete:
                 items.append(PutItem(obj))
 
-        for ref, obj in self.object_registry.items():
+        for _, obj in self.object_registry.items():
             if obj not in self.objects_to_delete and obj.modified_attributes():
                 items.append(UpdateItem(obj))
 
@@ -279,7 +278,7 @@ class AsyncSessionMaker:
 class ScopedSession:
     def __init__(
         self,
-        session_factory: Union[SessionMaker, AsyncSessionMaker],
+        session_factory: SessionMaker,
         scopefunc: Optional[Callable[[], int]] = None,
     ) -> None:
         self.session_factory = session_factory

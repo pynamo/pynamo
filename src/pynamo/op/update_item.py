@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Any, Dict, Literal, Type
 
 if TYPE_CHECKING:
-    from ..attribute import Expression
-    from ..model import Model
+    from pynamo.attribute import Expression
+    from pynamo.model import Model
 
 
 class UpdateItem:

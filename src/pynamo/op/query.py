@@ -9,10 +9,10 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from ..attribute import Attribute, BindParameter, Expression
-    from ..model import Model
+    from pynamo.attribute import Attribute, BindParameter, Expression
+    from pynamo.model import Model
 
-from ..constants import PRIMARY_INDEX
+from pynamo.constants import PRIMARY_INDEX
 
 
 class Query:
@@ -66,9 +66,6 @@ class Query:
                         self.sort_key = key_name
 
     def where(self, *args: "Expression") -> "Query":
-        if self.model is None:
-            raise TypeError("Model required")
-
         for exp in args:
             # attr_model = exp.left.model_cls
             if self.model != exp.left.model_cls:
